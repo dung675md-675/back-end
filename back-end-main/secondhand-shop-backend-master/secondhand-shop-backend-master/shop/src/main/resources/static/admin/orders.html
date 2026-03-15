@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - Secondhand Shop</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/orders.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h1>🛍️ Secondhand Shop</h1>
+                <p>Hệ thống quản lý bán hàng 2hand</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="categories.html">Danh mục</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="orders.html" class="active">Đơn hàng</a></li>
+                    <li><a href="customers.html">Khách hàng</a></li>
+                    <li><a href="#" onclick="logoutAdmin()" style="color:#ff4d4d">🚪 Đăng xuất</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">📋 Quản lý đơn hàng</h1>
+                <!-- ❌ BỎ NÚT TẠO ĐƠN HÀNG -->
+            </div>
+
+            <!-- STATISTICS -->
+            <div class="stats-container" style="margin-bottom: 1.5rem;">
+                <div class="stat-card" style="border-left-color: var(--warning-color);">
+                    <h3>Chờ duyệt</h3>
+                    <div class="stat-value" id="pendingOrders">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--secondary-color);">
+                    <h3>Đang giao</h3>
+                    <div class="stat-value" id="shippingOrders">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--success-color);">
+                    <h3>Đã giao</h3>
+                    <div class="stat-value" id="deliveredOrders">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: var(--danger-color);">
+                    <h3>Đã hủy</h3>
+                    <div class="stat-value" id="cancelledOrders">0</div>
+                </div>
+            </div>
+
+            <!-- FILTERS -->
+            <div class="grid grid-2" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="🔍 Tìm kiếm đơn hàng (mã đơn, khách hàng, SĐT)..." 
+                           onkeyup="searchOrders()">
+                </div>
+                <div class="form-group">
+                    <select id="statusFilter" onchange="filterOrders()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="PENDING">Chờ duyệt</option>
+                        <option value="CONFIRMED">Đã xác nhận</option>
+                        <option value="SHIPPING">Đang giao</option>
+                        <option value="DELIVERED">Đã giao</option>
+                        <option value="CANCELLED">Đã hủy</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Số điện thoại</th>
+                            <th>Địa chỉ giao hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Giảm giá</th>
+                            <th>Thành tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">
+                                <div class="spinner"></div>
+                                <p>Đang tải dữ liệu...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODAL XEM CHI TIẾT ĐƠN HÀNG
+         ======================================== -->
+    <div id="orderDetailModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Chi tiết đơn hàng</h2>
+                <button class="close-btn" onclick="closeOrderDetailModal()">&times;</button>
+            </div>
+            <div id="orderDetailContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODAL DUYỆT ĐƠN HÀNG
+         ======================================== -->
+    <div id="approveOrderModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">✅ Duyệt đơn hàng</h2>
+                <button class="close-btn" onclick="closeApproveOrderModal()">&times;</button>
+            </div>
+            <div id="approveOrderContent">
+                <p>Bạn có chắc chắn muốn <strong style="color: var(--success-color);">DUYỆT</strong> đơn hàng này?</p>
+                <p>Đơn hàng sẽ chuyển sang trạng thái <strong>"Đã xác nhận"</strong></p>
+                
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <button class="btn btn-success" onclick="confirmApproveOrder()" style="width: 100%; background: var(--success-color);">
+                        ✅ Xác nhận duyệt
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeApproveOrderModal()" style="width: 100%; margin-top: 0.5rem;">
+                        Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODAL TỪ CHỐI ĐƠN HÀNG
+         ======================================== -->
+    <div id="rejectOrderModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">❌ Từ chối đơn hàng</h2>
+                <button class="close-btn" onclick="closeRejectOrderModal()">&times;</button>
+            </div>
+            <form id="rejectOrderForm" onsubmit="confirmRejectOrder(event)">
+                <p>Bạn có chắc chắn muốn <strong style="color: var(--danger-color);">TỪ CHỐI</strong> đơn hàng này?</p>
+                
+                <div class="form-group">
+                    <label for="rejectReason">Lý do từ chối <span style="color: red;">*</span></label>
+                    <textarea id="rejectReason" 
+                              placeholder="Nhập lý do từ chối đơn hàng..." 
+                              required
+                              rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger" style="width: 100%;">
+                        ❌ Xác nhận từ chối
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeRejectOrderModal()" style="width: 100%; margin-top: 0.5rem;">
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="./js/config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/orders.js"></script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm - Secondhand Shop</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/products.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h1>🛍️ Secondhand Shop</h1>
+                <p>Hệ thống quản lý bán hàng 2hand</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="categories.html">Danh mục</a></li>
+                    <li><a href="products.html" class="active">Sản phẩm</a></li>
+                    <li><a href="orders.html">Đơn hàng</a></li>
+                    <li><a href="customers.html">Khách hàng</a></li>
+                    <li><a href="#" onclick="logoutAdmin()" style="color:#ff4d4d">🚪 Đăng xuất</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">📦 Quản lý sản phẩm</h1>
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    ➕ Thêm sản phẩm
+                </button>
+            </div>
+
+            <!-- FILTERS -->
+            <div class="grid grid-3" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="🔍 Tìm kiếm sản phẩm..." 
+                           onkeyup="searchProducts()">
+                </div>
+                <div class="form-group">
+                    <select id="categoryFilter" onchange="filterProducts()">
+                        <option value="">Tất cả danh mục</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="statusFilter" onchange="filterProducts()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="AVAILABLE">Còn hàng</option>
+                        <option value="SOLD">Đã bán</option>
+                        <option value="RESERVED">Đã đặt</option>
+                        <option value="DELETED">Đã xóa</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Giá bán</th>
+                            <th>Số lượng</th>
+                            <th>Tình trạng</th>
+                            <th>Trạng thái</th>
+                            <th>Lượt xem</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">
+                                <div class="spinner"></div>
+                                <p>Đang tải dữ liệu...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ========================================
+         MODAL THÊM/SỬA SẢN PHẨM
+         ======================================== -->
+    <div id="productModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Thêm sản phẩm mới</h2>
+                <button class="close-btn" onclick="closeProductModal()">&times;</button>
+            </div>
+            <form id="productForm" onsubmit="submitProduct(event)">
+                <input type="hidden" id="productId">
+                
+                <div class="form-group">
+                    <label for="productName">Tên sản phẩm <span style="color: red;">*</span></label>
+                    <input type="text" id="productName" placeholder="Nhập tên sản phẩm" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Mô tả</label>
+                    <textarea id="productDescription" placeholder="Nhập mô tả sản phẩm"></textarea>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="productPrice">Giá bán <span style="color: red;">*</span></label>
+                        <input type="number" id="productPrice" placeholder="0" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="productOriginalPrice">Giá gốc</label>
+                        <input type="number" id="productOriginalPrice" placeholder="0" min="0">
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label for="productQuantity">Số lượng <span style="color: red;">*</span></label>
+                        <input type="number" id="productQuantity" value="1" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCondition">Tình trạng</label>
+                        <select id="productCondition">
+                            <option value="NEW">Mới</option>
+                            <option value="LIKE_NEW">Như mới</option>
+                            <option value="GOOD" selected>Tốt</option>
+                            <option value="FAIR">Khá</option>
+                            <option value="POOR">Cũ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- DANH MỤC - CÓ NÚT THÊM MỚI -->
+                <div class="form-group">
+                    <label for="productCategory">Danh mục <span style="color: red;">*</span></label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="productCategory" required style="flex: 1;">
+                            <option value="">Chọn danh mục</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" onclick="openAddCategoryModal()" title="Thêm danh mục mới">
+                            ➕
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="productImageUrl">URL hình ảnh</label>
+                    <input type="text" id="productImageUrl" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="productStatus">Trạng thái</label>
+                    <select id="productStatus">
+                        <option value="AVAILABLE" selected>Còn hàng</option>
+                        <option value="RESERVED">Đã đặt</option>
+                        <option value="SOLD">Đã bán</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        💾 Lưu sản phẩm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODAL THÊM DANH MỤC MỚI
+         ======================================== -->
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">➕ Thêm danh mục mới</h2>
+                <button class="close-btn" onclick="closeAddCategoryModal()">&times;</button>
+            </div>
+            <form id="addCategoryForm" onsubmit="submitNewCategory(event)">
+                <div class="form-group">
+                    <label for="newCategoryName">Tên danh mục <span style="color: red;">*</span></label>
+                    <input type="text" id="newCategoryName" placeholder="Nhập tên danh mục" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newCategoryDescription">Mô tả</label>
+                    <textarea id="newCategoryDescription" placeholder="Nhập mô tả danh mục"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="newCategoryImageUrl">URL hình ảnh</label>
+                    <input type="text" id="newCategoryImageUrl" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        💾 Thêm danh mục
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+
+    <!-- SCRIPTS -->
+    <script src="./js/config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/products.js"></script>
+</body>
+</html>

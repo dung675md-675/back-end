@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+    <style>
+        .filter-wrapper {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            border-left: 6px solid var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .filter-label {
+            font-weight: 700;
+            color: var(--dark-color);
+            font-size: 1.1rem;
+        }
+
+        .modern-select {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 250px;
+        }
+
+        .modern-select:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Gợi ý tìm kiếm */
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🛍️</span>
+                    <span>Secondhand Shop</span>
+                </a>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html" class="active">Sản phẩm</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <div class="search-box" style="position: relative; margin-right: 1rem;">
+                    <input type="text" id="searchInput" placeholder="Tìm sản phẩm..." onkeyup="handleSearchInput(event)" autocomplete="off">
+                    <div id="searchSuggestions" class="suggestions-dropdown"></div>
+                </div>
+
+                <a href="cart.html" class="cart-wrapper-minimal">
+    <svg class="cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+    <span class="cart-badge-minimal" id="cartBadge">0</span>
+</a>
+                <div id="userMenu"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <nav class="breadcrumb-container">
+            <a href="index.html" class="breadcrumb-item home-link">Trang chủ</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-item active">Sản phẩm</span>
+        </nav>
+
+        <h1 class="section-title">Khám phá sản phẩm</h1>
+
+        <div class="filter-wrapper">
+            <div class="filter-item">
+                <span class="filter-label">Danh mục sản phẩm</span>
+                <select id="categoryFilter" onchange="filterProducts()" class="modern-select">
+                    <option value="">Tất cả danh mục</option>
+                </select>
+            </div>
+            
+            <div class="filter-stats">
+                <span style="color: var(--text-gray); font-weight: 500;"></span>
+            </div>
+        </div>
+
+        <div id="productsContainer" class="products-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Đang chuẩn bị danh sách sản phẩm...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 Secondhand Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/user-products.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load sản phẩm và danh mục từ user-products.js
+            if (typeof initProductsPage === 'function') {
+                await initProductsPage();
+            }
+            updateCartBadge();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🛍️</span>
+                    <span>Secondhand Shop</span>
+                </a>
+            </div>
+            <div class="header-right">
+                <div id="userMenu">
+                    </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div style="margin-bottom: 1.5rem;">
+            <a href="index.html" class="btn-back-home" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <span>🏠</span> Quay lại trang chủ
+            </a>
+        </div>
+
+        <div class="auth-container">
+            <h1 class="auth-title">👤 Thông tin cá nhân</h1>
+            <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+                Quản lý thông tin tài khoản và địa chỉ giao hàng của bạn
+            </p>
+            
+            <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" id="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Địa chỉ Email (Định danh)</label>
+                    <input type="email" id="email" class="form-control" disabled 
+                           style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
+                    <small style="color: var(--text-gray);">Email dùng để đăng nhập và không thể thay đổi.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ mặc định</label>
+                    <textarea id="address" class="form-control" rows="3" 
+                              placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..."></textarea>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        ✨ Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 Secondhand Shop. Mang đồ cũ đến cuộc sống mới.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bảo mật: Nếu chưa đăng nhập thì đẩy ra trang login
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Đổ dữ liệu từ localStorage vào form
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('fullName').value = user.fullName || '';
+                document.getElementById('email').value = user.email || '';
+                // Nếu bạn có lưu phone và address trong token/session thì điền tiếp ở đây
+            }
+        });
+
+        async function handleUpdateProfile(event) {
+            event.preventDefault();
+            showNotification('Đang cập nhật thông tin...', 'warning');
+            
+            // Giả lập lưu thành công (Bạn cần viết API Put ở Backend sau)
+            setTimeout(() => {
+                showNotification('Cập nhật hồ sơ thành công! ✨', 'success');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

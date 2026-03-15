@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết sản phẩm</title>
+    <link rel="stylesheet" href="css/user-style.css">
+    <style>
+        .product-detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
+        .detail-image { width: 100%; border-radius: 10px; }
+        .price-large { font-size: 2rem; color: var(--danger-color); font-weight: bold; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <header class="main-header"></header>
+
+    <main class="container">
+    <div style="margin-bottom: 1rem;">
+        <a href="products.html" style="text-decoration: none; color: var(--primary-color); font-weight: bold;">
+            ← Quay lại danh sách sản phẩm
+        </a>
+    </div>
+
+    <div id="productDetail" class="product-detail-container">
+        </div>
+</main>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            const product = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/${id}`);
+            
+            document.getElementById('productDetail').innerHTML = `
+                <img src="${product.imageUrl || 'images/placeholder.png'}" class="detail-image">
+                <div class="detail-info">
+                    <h1>${product.name}</h1>
+                    <p class="price-large">${formatCurrency(product.price)}</p>
+                    <div class="description">${product.description || 'Chưa có mô tả'}</div>
+                    <button class="btn btn-primary btn-block" style="margin-top:2rem" 
+                            onclick="addToCart(${product.id}, '${product.name}', ${product.price}, '${product.imageUrl}')">
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

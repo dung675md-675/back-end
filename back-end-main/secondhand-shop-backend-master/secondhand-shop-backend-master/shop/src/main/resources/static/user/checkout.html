@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+    <style>
+        /* Phóng to form xác nhận đơn hàng */
+        .auth-container {
+            max-width: 900px;
+        }
+
+        .auth-title {
+            font-size: 2.4rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1.3fr 1fr;
+        }
+
+        #checkoutForm .form-group label {
+            font-size: 1rem;
+        }
+
+        #checkoutForm .form-group input,
+        #checkoutForm .form-group textarea {
+            font-size: 1rem;
+        }
+
+        #orderItemsSummary {
+            font-size: 0.98rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🛍️</span>
+                    <span>Secondhand Shop</span>
+                </a>
+            </div>
+            <div class="header-right">
+                <div id="userMenu"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div style="margin-bottom: 1.5rem;">
+            <a href="cart.html" class="btn-back-home" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <span>🛒</span> Quay lại giỏ hàng
+            </a>
+        </div>
+
+        <div class="auth-container">
+            <h1 class="auth-title">🧾 Xác nhận đơn hàng</h1>
+            <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+                Kiểm tra thông tin giao hàng và sản phẩm trước khi đặt mua
+            </p>
+
+            <div class="grid-2" style="gap: 2rem;">
+                <!-- Thông tin giao hàng -->
+                <div>
+                    <h2 style="margin-bottom: 1rem;">Thông tin giao hàng</h2>
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại <span style="color: var(--danger-color);">*</span></label>
+                            <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" disabled 
+                                   style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
+                            <textarea id="address" class="form-control" rows="3" 
+                                      placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="note">Ghi chú cho đơn hàng</label>
+                            <textarea id="note" class="form-control" rows="3" 
+                                      placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tóm tắt đơn hàng -->
+                <div>
+                    <h2 style="margin-bottom: 1rem;">Đơn hàng của bạn</h2>
+                    <div id="orderItemsSummary" style="max-height: 320px; overflow-y: auto; margin-bottom: 1rem;"></div>
+
+                    <div class="order-summary" style="background: #f9fafb; border-radius: 10px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+                        <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Tạm tính</span>
+                            <strong id="subtotalAmount">0đ</strong>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Giảm giá</span>
+                            <strong id="discountAmount">0đ</strong>
+                        </div>
+                        <div style="height:1px; background:#e2e8f0; margin:0.75rem 0;"></div>
+                        <div style="display:flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight:600;">Tổng thanh toán</span>
+                            <span id="finalAmount" style="font-size:1.3rem; font-weight:700; color: var(--danger-color);">0đ</span>
+                        </div>
+                    </div>
+
+                    <button id="placeOrderBtn" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                        ✅ Đặt hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 Secondhand Shop. Mang đồ cũ đến cuộc sống mới.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isLoggedIn()) {
+                showNotification('Vui lòng đăng nhập để tiếp tục!', 'warning');
+                window.location.href = '../login.html';
+                return;
+            }
+
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('fullName').value = user.fullName || '';
+                document.getElementById('email').value = user.email || '';
+            }
+
+            const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+            const cart = getCart();
+            const items = cart.filter(item => checkoutIds.includes(item.productId));
+
+            if (!items.length) {
+                showNotification('Không tìm thấy sản phẩm để thanh toán. Vui lòng chọn lại trong giỏ hàng.', 'warning');
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            renderOrderSummary(items);
+
+            document.getElementById('placeOrderBtn').addEventListener('click', function() {
+                handlePlaceOrder(items);
+            });
+        });
+
+        function renderOrderSummary(items) {
+            const container = document.getElementById('orderItemsSummary');
+            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const discount = 0;
+            const finalAmount = subtotal - discount;
+
+            container.innerHTML = items.map(item => `
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:0.75rem;">
+                    <div style="flex:1; margin-right: 0.75rem;">
+                        <div style="font-weight:500;">${item.productName}</div>
+                        <div style="font-size:0.85rem; color:#718096;">Số lượng: ${item.quantity}</div>
+                    </div>
+                    <div style="text-align:right; white-space:nowrap;">
+                        <div style="font-weight:600;">${formatCurrency(item.price * item.quantity)}</div>
+                        <div style="font-size:0.8rem; color:#718096;">${formatCurrency(item.price)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
+            document.getElementById('discountAmount').textContent = formatCurrency(discount);
+            document.getElementById('finalAmount').textContent = formatCurrency(finalAmount);
+        }
+
+        async function handlePlaceOrder(items) {
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const note = document.getElementById('note').value.trim();
+
+            if (!fullName || !phone || !address) {
+                showNotification('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.', 'warning');
+                return;
+            }
+
+            const user = getCurrentUser();
+            if (!user || !user.userId) {
+                showNotification('Không tìm thấy thông tin tài khoản. Vui lòng đăng nhập lại.', 'error');
+                window.location.href = '../login.html';
+                return;
+            }
+
+            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const discount = 0;
+            const finalAmount = subtotal - discount;
+
+            const orderItems = items.map(item => ({
+                productId: item.productId,
+                price: item.price,
+                quantity: item.quantity,
+                subtotal: item.price * item.quantity
+            }));
+
+            const payload = {
+                customerId: user.userId,
+                shippingAddress: address,
+                shippingPhone: phone,
+                note: note,
+                totalAmount: subtotal,
+                discountAmount: discount,
+                finalAmount: finalAmount,
+                orderItems: orderItems
+            };
+
+            const btn = document.getElementById('placeOrderBtn');
+            btn.disabled = true;
+            btn.textContent = 'Đang tạo đơn hàng...';
+
+            try {
+                await fetchPost(API_ENDPOINTS.ORDERS + '/checkout', payload);
+
+                const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+                let cart = getCart();
+                cart = cart.filter(item => !checkoutIds.includes(item.productId));
+                saveCart(cart);
+                localStorage.removeItem('checkoutItems');
+
+                showNotification('Đặt hàng thành công! 🎉', 'success');
+                setTimeout(() => {
+                    window.location.href = 'my-orders.html';
+                }, 1500);
+            } catch (error) {
+                console.error(error);
+                showNotification('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.', 'error');
+                btn.disabled = false;
+                btn.textContent = '✅ Đặt hàng';
+            }
+        }
+    </script>
+</body>
+</html>

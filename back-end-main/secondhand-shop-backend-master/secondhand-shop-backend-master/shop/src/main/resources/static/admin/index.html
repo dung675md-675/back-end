@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang chủ - Secondhand Shop</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/responsive.css" />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <h1>🛍️ Secondhand Shop</h1>
+          <p>Hệ thống quản lý bán hàng 2hand</p>
+        </div>
+        <nav>
+          <ul>
+            <li><a href="index.html" class="active">Trang chủ</a></li>
+            <li><a href="categories.html">Danh mục</a></li>
+            <li><a href="products.html">Sản phẩm</a></li>
+            <li><a href="orders.html">Đơn hàng</a></li>
+            <li><a href="customers.html">Khách hàng</a></li>
+            <li>
+              <a href="#" onclick="logoutAdmin()" style="color: #ff4d4d">
+                🚪 Đăng xuất
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+      <h1 class="page-title">Dashboard - Tổng quan</h1>
+
+      <!-- STATISTICS -->
+      <div class="stats-container">
+        <div class="stat-card">
+          <h3>Tổng sản phẩm</h3>
+          <div class="stat-value" id="totalProducts">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Sản phẩm có sẵn</h3>
+          <div class="stat-value" id="availableProducts">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Tổng đơn hàng</h3>
+          <div class="stat-value" id="totalOrders">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Khách hàng</h3>
+          <div class="stat-value" id="totalCustomers">0</div>
+        </div>
+      </div>
+
+      <!-- LATEST PRODUCTS -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Sản phẩm mới nhất</h2>
+          <a href="products.html" class="btn btn-primary btn-sm">Xem tất cả</a>
+        </div>
+        <div id="latestProducts" class="grid grid-4">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Đang tải...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ORDERS -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Đơn hàng gần đây</h2>
+          <a href="orders.html" class="btn btn-secondary btn-sm">Xem tất cả</a>
+        </div>
+        <div class="table-container">
+          <table id="recentOrdersTable">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+              </tr>
+            </thead>
+            <tbody id="recentOrdersBody">
+              <tr>
+                <td colspan="5" class="loading">
+                  <div class="spinner"></div>
+                  <p>Đang tải...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="./js/config.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+      // ===================================
+      // DASHBOARD LOGIC
+      // ===================================
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        await loadDashboardData();
+      });
+
+      async function loadDashboardData() {
+        try {
+          // Load statistics
+          await Promise.all([
+            loadStatistics(),
+            loadLatestProducts(),
+            loadRecentOrders(),
+          ]);
+        } catch (error) {
+          console.error("Error loading dashboard:", error);
+        }
+      }
+
+      // Load statistics
+      async function loadStatistics() {
+        try {
+          const [products, orders, customers] = await Promise.all([
+            fetchGet(API_ENDPOINTS.PRODUCTS),
+            fetchGet(API_ENDPOINTS.ORDERS),
+            fetchGet(API_ENDPOINTS.CUSTOMERS),
+          ]);
+
+          document.getElementById("totalProducts").textContent =
+            products.length;
+          document.getElementById("availableProducts").textContent =
+            products.filter((p) => p.status === "AVAILABLE").length;
+          document.getElementById("totalOrders").textContent = orders.length;
+          document.getElementById("totalCustomers").textContent =
+            customers.length;
+        } catch (error) {
+          console.error("Error loading statistics:", error);
+        }
+      }
+
+      // Load latest products
+      async function loadLatestProducts() {
+        try {
+          const products = await fetchGet(API_ENDPOINTS.PRODUCTS_LATEST);
+          const container = document.getElementById("latestProducts");
+
+          if (products.length === 0) {
+            container.innerHTML = "<p>Chưa có sản phẩm nào</p>";
+            return;
+          }
+
+          container.innerHTML = products
+            .slice(0, 4)
+            .map(
+              (product) => `
+                    <div class="product-card">
+                        <img src="${product.imageUrl || "images/placeholder.png"}" 
+                             alt="${product.name}" 
+                             class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price">${formatCurrency(product.price)}</div>
+                            ${
+                              product.originalPrice
+                                ? `<div class="product-original-price">${formatCurrency(product.originalPrice)}</div>`
+                                : ""
+                            }
+                            <span class="badge badge-${getStatusBadgeClass(product.status)}">
+                                ${getStatusText(product.status)}
+                            </span>
+                        </div>
+                    </div>
+                `,
+            )
+            .join("");
+        } catch (error) {
+          document.getElementById("latestProducts").innerHTML =
+            '<p class="error">Lỗi khi tải sản phẩm</p>';
+        }
+      }
+
+      // Load recent orders
+      async function loadRecentOrders() {
+        try {
+          const orders = await fetchGet(API_ENDPOINTS.ORDERS);
+          const tbody = document.getElementById("recentOrdersBody");
+
+          if (orders.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="5">Chưa có đơn hàng nào</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = orders
+            .slice(0, 5)
+            .map(
+              (order) => `
+                    <tr>
+                        <td><strong>${order.orderCode}</strong></td>
+                        <td>${order.customerName}</td>
+                        <td><strong>${formatCurrency(order.finalAmount)}</strong></td>
+                        <td><span class="badge badge-${getOrderStatusBadgeClass(order.status)}">
+                            ${getOrderStatusText(order.status)}
+                        </span></td>
+                        <td>${formatDate(order.createdAt)}</td>
+                    </tr>
+                `,
+            )
+            .join("");
+        } catch (error) {
+          document.getElementById("recentOrdersBody").innerHTML =
+            '<tr><td colspan="5">Lỗi khi tải đơn hàng</td></tr>';
+        }
+      }
+
+      // Helper functions
+      function getStatusBadgeClass(status) {
+        const classes = {
+          AVAILABLE: "success",
+          SOLD: "secondary",
+          RESERVED: "warning",
+          DELETED: "danger",
+        };
+        return classes[status] || "secondary";
+      }
+
+      function getStatusText(status) {
+        const texts = {
+          AVAILABLE: "Còn hàng",
+          SOLD: "Đã bán",
+          RESERVED: "Đã đặt",
+          DELETED: "Đã xóa",
+        };
+        return texts[status] || status;
+      }
+
+      function getOrderStatusBadgeClass(status) {
+        const classes = {
+          PENDING: "warning",
+          CONFIRMED: "info",
+          SHIPPING: "info",
+          DELIVERED: "success",
+          CANCELLED: "danger",
+        };
+        return classes[status] || "secondary";
+      }
+
+      function getOrderStatusText(status) {
+        const texts = {
+          PENDING: "Chờ xử lý",
+          CONFIRMED: "Đã xác nhận",
+          SHIPPING: "Đang giao",
+          DELIVERED: "Đã giao",
+          CANCELLED: "Đã hủy",
+        };
+        return texts[status] || status;
+      }
+    </script>
+  </body>
+</html>
