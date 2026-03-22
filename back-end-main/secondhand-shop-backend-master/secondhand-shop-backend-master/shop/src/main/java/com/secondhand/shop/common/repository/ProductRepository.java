@@ -17,8 +17,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Tìm theo status
     List<Product> findByStatus(Product.ProductStatus status);
 
-    // Tìm theo tên (search)
+    // Tìm theo tên (search cũ)
     List<Product> findByNameContainingIgnoreCase(String name);
+
+    // Tìm kiếm thông minh bằng JPQL (Tên, Mô tả, Danh mục)
+    @Query("SELECT p FROM Product p WHERE " +
+           "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.category.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Product> findByKeywordFuzzy(@Param("keyword") String keyword);
 
     // Tìm theo khoảng giá
     List<Product> findByPriceBetween(Double minPrice, Double maxPrice);

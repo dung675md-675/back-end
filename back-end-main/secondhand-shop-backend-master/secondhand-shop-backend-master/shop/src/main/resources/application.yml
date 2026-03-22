@@ -10,3 +10,5 @@ spring:
     show-sql: true
   main:
     allow-bean-definition-overriding: true
+server:
+  port: 8080

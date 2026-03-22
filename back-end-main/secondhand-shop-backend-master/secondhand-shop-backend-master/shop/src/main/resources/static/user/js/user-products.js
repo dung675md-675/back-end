@@ -80,12 +80,76 @@ async function filterProducts() {
 
 async function searchProducts(keyword) {
     try {
-        const products = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/search?name=${encodeURIComponent(keyword)}`);
+        const products = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/search?keyword=${encodeURIComponent(keyword)}`);
         renderProducts(products);
     } catch (error) {
         console.error('Lỗi tìm kiếm:', error);
     }
 }
+
+// --- TÌM KIẾM TRỰC TIẾP (Gợi ý tìm kiếm) ---
+let searchTimeout = null;
+
+async function handleSearchInput(event) {
+    const keyword = event.target.value.trim();
+    const suggestionsBox = document.getElementById('searchSuggestions');
+    
+    if (event.key === 'Enter') {
+        if (keyword) {
+            window.location.href = `products.html?search=${encodeURIComponent(keyword)}`;
+        } else {
+            window.location.href = 'products.html';
+        }
+        return;
+    }
+
+    if (keyword.length < 2) {
+        if (suggestionsBox) suggestionsBox.style.display = 'none';
+        return;
+    }
+
+    // Debounce API calls (300ms)
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        try {
+            const products = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/search?keyword=${encodeURIComponent(keyword)}`);
+            if (suggestionsBox) {
+                if (products && products.length > 0) {
+                    const html = products.slice(0, 5).map(p => `
+                        <div class="suggestion-item" onclick="window.location.href='product-detail.html?id=${p.id}'" style="display: flex; align-items: center; padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; gap: 10px; transition: background 0.2s;">
+                            <img src="${p.imageUrl || 'images/placeholder.png'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='images/placeholder.png'">
+                            <div>
+                                <div style="font-weight: 500; font-size: 0.9rem; color: #333;">${p.name}</div>
+                                <div style="color: #ee4d2d; font-size: 0.85rem; font-weight: 600;">${formatCurrency(p.price)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    suggestionsBox.innerHTML = html + `
+                        <div style="text-align: center; padding: 10px; font-size: 0.85rem; color: #888; cursor: pointer; background: #fafafa;" onclick="window.location.href='products.html?search=${encodeURIComponent(keyword)}'">
+                            Xem tất cả kết quả cho "${keyword}"
+                        </div>
+                    `;
+                    suggestionsBox.style.display = 'block';
+                } else {
+                    suggestionsBox.innerHTML = '<div style="padding: 10px; text-align: center; color: #888; font-size: 0.9rem;">Không tìm thấy sản phẩm phù hợp</div>';
+                    suggestionsBox.style.display = 'block';
+                }
+            }
+        } catch (error) {
+            console.error('Lỗi lấy gợi ý:', error);
+        }
+    }, 300);
+}
+
+// Ẩn gợi ý khi click ra ngoài
+document.addEventListener('click', function(e) {
+    const searchBox = document.querySelector('.search-box');
+    const suggestionsBox = document.getElementById('searchSuggestions');
+    if (searchBox && !searchBox.contains(e.target)) {
+        if(suggestionsBox) suggestionsBox.style.display = 'none';
+    }
+});
 
 // --- TRANG CHI TIẾT SẢN PHẨM (product-detail.html) ---
 

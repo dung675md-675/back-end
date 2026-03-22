@@ -803,12 +803,123 @@ body {
 /* ===================================
    FOOTER
    =================================== */
-.main-footer {
-    background: var(--dark-color);
-    color: white;
-    text-align: center;
-    padding: 2rem 0;
+/* ===================================
+   SHOPEE-STYLE FOOTER
+   =================================== */
+.shopee-footer {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-top: none;
+    padding: 3rem 0;
     margin-top: 5rem;
+    font-size: 0.85rem;
+}
+
+.shopee-footer .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 2rem;
+}
+
+.shopee-footer .footer-col h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.shopee-footer .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.shopee-footer .footer-col ul li {
+    margin-bottom: 0.8rem;
+}
+
+.shopee-footer .footer-col ul li a {
+    color: #b3b3b3;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.shopee-footer .footer-col ul li a:hover {
+    color: var(--primary-color);
+}
+
+.shopee-footer .payment-methods, .shopee-footer .shipping-methods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.shopee-footer .payment-methods img, .shopee-footer .shipping-methods img {
+    width: 100%;
+    padding: 4px;
+    background: #fff;
+    border-radius: 4px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.shopee-footer .app-download {
+    display: flex;
+    gap: 1rem;
+}
+
+.shopee-footer .qr-code img {
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.shopee-footer .app-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.shopee-footer .app-links img {
+    height: 22px;
+    background: #fff;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.shopee-footer .footer-bottom {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #333;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+@media (max-width: 1024px) {
+    .shopee-footer .footer-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .shopee-footer .footer-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 480px) {
+    .shopee-footer .footer-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ===================================

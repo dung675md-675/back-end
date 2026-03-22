@@ -120,7 +120,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductDTO> searchProducts(String keyword) {
-        return productRepository.findByNameContainingIgnoreCase(keyword).stream()
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAvailableProducts();
+        }
+        return productRepository.findByKeywordFuzzy(keyword.trim()).stream()
                 .map(ProductDTO::fromEntity)
                 .collect(Collectors.toList());
     }
