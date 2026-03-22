@@ -10,7 +10,7 @@
             background: #f5f5f5;
             padding: 2rem 0;
         }
-        .product-card {
+        .product-detail-card {
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -20,7 +20,7 @@
             gap: 2rem;
         }
         @media (max-width: 768px) {
-            .product-card {
+            .product-detail-card {
                 grid-template-columns: 1fr;
             }
         }
@@ -327,9 +327,9 @@
             const condition = conditions[Math.floor(Math.random() * conditions.length)];
             
             const html = `
-                <div class="product-card">
+                <div class="product-detail-card">
                     <div class="product-image-section">
-                        <img src="${product.imageUrl || 'images/placeholder.png'}" onerror="this.src='images/placeholder.png'" class="main-image" alt="${product.name}">
+                        <img src="${product.imageUrl || '../images/placeholder.png'}" onerror="this.src='../images/placeholder.png'" class="main-image" alt="${product.name}">
                     </div>
                     
                     <div class="product-info-section">
@@ -372,15 +372,15 @@
                         <div class="quantity-selector">
                             <span style="color: #555; width: 104px;">Số lượng</span>
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                                <button class="qty-btn" id="btnMinusQty">-</button>
                                 <input type="number" id="buyQty" class="qty-input" value="1" min="1" max="99">
-                                <button class="qty-btn" onclick="updateQty(1)">+</button>
+                                <button class="qty-btn" id="btnAddQty">+</button>
                             </div>
                             <span style="color: #767676; font-size: 0.9rem; margin-left: 1rem;">${Math.floor(Math.random() * 50) + 1} sản phẩm có sẵn</span>
                         </div>
 
                         <div class="product-actions">
-                            <button class="btn-add-cart" onclick="handleAddToCart()">
+                            <button class="btn-add-cart" id="btnAddToCart">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="9" cy="21" r="1"></circle>
                                     <circle cx="20" cy="21" r="1"></circle>
@@ -388,7 +388,7 @@
                                 </svg>
                                 Thêm Vào Giỏ Hàng
                             </button>
-                            <button class="btn-buy-now" onclick="handleBuyNow()">Mua Ngay</button>
+                            <button class="btn-buy-now" id="btnBuyNow">Mua Ngay</button>
                         </div>
                     </div>
                 </div>
@@ -400,6 +400,12 @@
             `;
             
             document.getElementById('productDetailContent').innerHTML = html;
+            
+            // Attach events after rendering to ensure they work reliably
+            document.getElementById('btnMinusQty').addEventListener('click', () => updateQty(-1));
+            document.getElementById('btnAddQty').addEventListener('click', () => updateQty(1));
+            document.getElementById('btnAddToCart').addEventListener('click', handleAddToCart);
+            document.getElementById('btnBuyNow').addEventListener('click', handleBuyNow);
         }
 
         function updateQty(change) {

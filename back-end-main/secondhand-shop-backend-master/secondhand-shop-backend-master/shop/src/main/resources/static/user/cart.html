@@ -432,11 +432,11 @@
     <script src="js/cart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            renderCart();
+            loadCartItems();
             updateCartBadge();
         });
 
-        function renderCart() {
+        function loadCartItems() {
             const cart = getCart();
             const contentDiv = document.getElementById('cartContent');
 
@@ -475,9 +475,9 @@
                                    onchange="onItemCheck(this, ${item.productId})">
                         </div>
                         <div class="cart-product-info">
-                            <img src="${item.imageUrl || 'images/placeholder.png'}"
-                                 onerror="this.src='images/placeholder.png'"
-                                 alt="${item.productName}"
+                            <img src="${item.imageUrl || '../images/placeholder.png'}"
+                                 onerror="this.src='../images/placeholder.png'"
+                                 alt="${(item.productName || '').replace(/"/g, '&quot;')}"
                                  class="cart-product-img">
                             <span class="cart-product-name">${item.productName}</span>
                         </div>
@@ -497,7 +497,7 @@
                             ${formatCurrency(item.price * item.quantity)}
                         </div>
                         <div>
-                            <button class="cart-delete-btn" onclick="removeItem(${item.productId}, '${item.productName}')">
+                            <button class="cart-delete-btn" onclick="removeItem(${item.productId}, '${(item.productName || '').replace(/'/g, "\\\\'").replace(/"/g, '&quot;')}')">
                                 Xóa
                             </button>
                         </div>
