@@ -6,308 +6,449 @@
     <title>Thanh toán - Secondhand Shop</title>
     <link rel="stylesheet" href="css/user-style.css">
     <style>
-        /* Phóng to form xác nhận đơn hàng */
-        .auth-container {
-            max-width: 900px;
-        }
-
-        .auth-title {
-            font-size: 2.4rem;
-        }
-
-        .grid-2 {
-            grid-template-columns: 1.3fr 1fr;
-        }
-
-        #checkoutForm .form-group label {
-            font-size: 1rem;
-        }
-
+        .auth-container { max-width: 900px; }
+        .auth-title { font-size: 2.4rem; }
+        .grid-2 { grid-template-columns: 1.3fr 1fr; }
+        #checkoutForm .form-group label { font-size: 1rem; }
         #checkoutForm .form-group input,
-        #checkoutForm .form-group textarea {
-            font-size: 1rem;
-        }
+        #checkoutForm .form-group textarea { font-size: 1rem; }
+        #orderItemsSummary { font-size: 0.98rem; }
 
-        #orderItemsSummary {
-            font-size: 0.98rem;
+        /* ===== VOUCHER BOX ===== */
+        .voucher-box {
+            border: 1.5px dashed #c4b5fd;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+            background: #faf8ff;
         }
+        .voucher-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c3fc5;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .voucher-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .voucher-input {
+            flex: 1;
+            padding: 9px 12px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .voucher-input:focus { border-color: #6c3fc5; }
+        .btn-apply-voucher {
+            background: #6c3fc5;
+            color: white;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+        .btn-apply-voucher:hover { opacity: 0.85; }
+        .btn-remove-voucher {
+            background: #ff5252;
+            color: white;
+            border: none;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-remove-voucher:hover { opacity: 0.85; }
+        .voucher-result {
+            margin-top: 8px;
+            font-size: 13px;
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: none;
+        }
+        .voucher-result.success {
+            display: block;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .voucher-result.error {
+            display: block;
+            background: #fce4ec;
+            color: #c62828;
+        }
+        .discount-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .discount-value { color: #2e7d32; font-weight: 600; }
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-container">
-            <div class="header-left">
-                <a href="index.html" class="logo">
-                    <span class="logo-icon">🛍️</span>
-                    <span>Secondhand Shop</span>
-                </a>
-            </div>
-            <div class="header-right">
-                <div id="userMenu"></div>
-            </div>
-        </div>
-    </header>
-
-    <main class="container">
-        <div style="margin-bottom: 1.5rem;">
-            <a href="cart.html" class="btn-back-home" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                <span>🛒</span> Quay lại giỏ hàng
+<header class="main-header">
+    <div class="header-container">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>Secondhand Shop</span>
             </a>
         </div>
+        <div class="header-right">
+            <div id="userMenu"></div>
+        </div>
+    </div>
+</header>
 
-        <div class="auth-container">
-            <h1 class="auth-title">🧾 Xác nhận đơn hàng</h1>
-            <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
-                Kiểm tra thông tin giao hàng và sản phẩm trước khi đặt mua
-            </p>
+<main class="container">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="cart.html" class="btn-back-home" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            <span></span> Quay lại giỏ hàng
+        </a>
+    </div>
 
-            <div class="grid-2" style="gap: 2rem;">
-                <!-- Thông tin giao hàng -->
-                <div>
-                    <h2 style="margin-bottom: 1rem;">Thông tin giao hàng</h2>
-                    <form id="checkoutForm">
-                        <div class="form-group">
-                            <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
-                            <input type="text" id="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
-                        </div>
+    <div class="auth-container">
+        <h1 class="auth-title">Xác nhận đơn hàng</h1>
+        <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+            Kiểm tra thông tin giao hàng và sản phẩm trước khi đặt mua
+        </p>
 
-                        <div class="form-group">
-                            <label for="phone">Số điện thoại <span style="color: var(--danger-color);">*</span></label>
-                            <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" class="form-control" disabled 
-                                   style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address">Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
-                            <textarea id="address" class="form-control" rows="3" 
-                                      placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..." required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="note">Ghi chú cho đơn hàng</label>
-                            <textarea id="note" class="form-control" rows="3" 
-                                      placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Tóm tắt đơn hàng -->
-                <div>
-                    <h2 style="margin-bottom: 1rem;">Đơn hàng của bạn</h2>
-                    <div id="orderItemsSummary" style="max-height: 320px; overflow-y: auto; margin-bottom: 1rem;"></div>
-
-                    <div class="order-summary" style="background: #f9fafb; border-radius: 10px; padding: 1.5rem; border: 1px solid #e2e8f0;">
-                        <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span>Tạm tính</span>
-                            <strong id="subtotalAmount">0đ</strong>
-                        </div>
-                        <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span>Giảm giá</span>
-                            <strong id="discountAmount">0đ</strong>
-                        </div>
-                        <div style="height:1px; background:#e2e8f0; margin:0.75rem 0;"></div>
-                        <div style="display:flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight:600;">Tổng thanh toán</span>
-                            <span id="finalAmount" style="font-size:1.3rem; font-weight:700; color: var(--danger-color);">0đ</span>
-                        </div>
+        <div class="grid-2" style="gap: 2rem;">
+            <!-- Thông tin giao hàng -->
+            <div>
+                <h2 style="margin-bottom: 1rem;">Thông tin giao hàng</h2>
+                <form id="checkoutForm">
+                    <div class="form-group">
+                        <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" id="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
                     </div>
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại <span style="color: var(--danger-color);">*</span></label>
+                        <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" class="form-control" disabled
+                               style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
+                        <textarea id="address" class="form-control" rows="3"
+                                  placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Ghi chú cho đơn hàng</label>
+                        <textarea id="note" class="form-control" rows="3"
+                                  placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+                    </div>
+                </form>
+            </div>
 
-                    <button id="placeOrderBtn" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
-                        ✅ Đặt hàng
-                    </button>
+            <!-- Tóm tắt đơn hàng -->
+            <div>
+                <h2 style="margin-bottom: 1rem;">Đơn hàng của bạn</h2>
+                <div id="orderItemsSummary" style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem;"></div>
+
+                <!-- VOUCHER BOX -->
+                <div class="voucher-box">
+                    <div class="voucher-label">🎟️ Mã giảm giá</div>
+                    <div class="voucher-input-row">
+                        <input type="text" id="voucherInput" class="voucher-input"
+                               placeholder="Nhập mã voucher..." maxlength="50">
+                        <button class="btn-apply-voucher" onclick="applyVoucher()">Áp dụng</button>
+                        <button class="btn-remove-voucher" id="removeVoucherBtn"
+                                onclick="removeVoucher()" style="display:none;">✕</button>
+                    </div>
+                    <div id="voucherResult" class="voucher-result"></div>
                 </div>
+
+                <!-- ORDER SUMMARY -->
+                <div class="order-summary" style="background: #f9fafb; border-radius: 10px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Tạm tính</span>
+                        <strong id="subtotalAmount">0đ</strong>
+                    </div>
+                    <div class="discount-row" id="discountRow">
+                        <span>Giảm giá <span id="voucherCodeDisplay" style="font-size:12px;color:#6c3fc5;"></span></span>
+                        <strong id="discountAmount" class="discount-value">0đ</strong>
+                    </div>
+                    <div style="height:1px; background:#e2e8f0; margin:0.75rem 0;"></div>
+                    <div style="display:flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight:600;">Tổng thanh toán</span>
+                        <span id="finalAmount" style="font-size:1.3rem; font-weight:700; color: var(--danger-color);">0đ</span>
+                    </div>
+                </div>
+
+                <button id="placeOrderBtn" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                    Đặt hàng
+                </button>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
-            <footer class="shopee-footer">
-        <div class="footer-container">
-            <div class="footer-col">
-                <h3>DỊCH VỤ KHÁCH HÀNG</h3>
-                <ul>
-                    <li><a href="#">Trung tâm Trợ giúp</a></li>
-                    <li><a href="#">Blog Mua Sắm</a></li>
-                    <li><a href="#">Cửa hàng Chính hãng</a></li>
-                    <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
-                    <li><a href="#">Hướng dẫn bán hàng</a></li>
-                    <li><a href="#">Thanh toán trực tuyến</a></li>
-                    <li><a href="#">Điểm thưởng</a></li>
-                    <li><a href="#">Đơn Hàng</a></li>
-                    <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
-                    <li><a href="#">Liên Hệ Chúng Tôi</a></li>
-                    <li><a href="#">Chính Sách Bảo Hành</a></li>
-                </ul>
+<footer class="shopee-footer">
+    <div class="footer-container">
+        <div class="footer-col">
+            <h3>DỊCH VỤ KHÁCH HÀNG</h3>
+            <ul>
+                <li><a href="#">Trung tâm Trợ giúp</a></li>
+                <li><a href="#">Blog Mua Sắm</a></li>
+                <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
+                <li><a href="#">Thanh toán trực tuyến</a></li>
+                <li><a href="#">Đơn Hàng</a></li>
+                <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
+                <li><a href="#">Liên Hệ Chúng Tôi</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>VỀ CHÚNG TÔI</h3>
+            <ul>
+                <li><a href="#">Giới thiệu</a></li>
+                <li><a href="#">Tuyển dụng</a></li>
+                <li><a href="#">Điều Khoản</a></li>
+                <li><a href="#">Chính Sách Bảo Mật</a></li>
+                <li><a href="#">Flash Sale</a></li>
+                <li><a href="#">Liên Hệ Truyền Thông</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>THANH TOÁN</h3>
+            <div class="payment-methods">
+                <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
+                <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
+                <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
             </div>
-            <div class="footer-col">
-                <h3>VỀ CHÚNG TÔI</h3>
-                <ul>
-                    <li><a href="#">Giới thiệu</a></li>
-                    <li><a href="#">Tuyển dụng</a></li>
-                    <li><a href="#">Điều Khoản</a></li>
-                    <li><a href="#">Chính Sách Bảo Mật</a></li>
-                    <li><a href="#">Kênh Người Bán</a></li>
-                    <li><a href="#">Flash Sale</a></li>
-                    <li><a href="#">Tiếp Thị Liên Kết</a></li>
-                    <li><a href="#">Liên Hệ Truyền Thông</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h3>THANH TOÁN</h3>
-                <div class="payment-methods">
-                    <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
-                    <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
-                    <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
-                </div>
-                <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
-                <div class="shipping-methods">
-                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
-                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
-                </div>
-            </div>
-            <div class="footer-col">
-                <h3>THEO DÕI CHÚNG TÔI</h3>
-                <ul>
-                    <li><a href="#"><span class="icon">📘</span> Facebook</a></li>
-                    <li><a href="#"><span class="icon">📸</span> Instagram</a></li>
-                    <li><a href="#"><span class="icon">💼</span> LinkedIn</a></li>
-                </ul>
+            <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
+            <div class="shipping-methods">
+                <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
+                <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
-            <p style="margin-top: 0.5rem; color: #888; font-size: 0.8rem;">Quốc gia &amp; Khu vực: Singapore | Indonesia | Thái Lan | Malaysia | Việt Nam | Philippines | Brazil | México | Đài Loan</p>
+        <div class="footer-col">
+            <h3>THEO DÕI CHÚNG TÔI</h3>
+            <ul>
+                <li><a href="#"><span class="icon"></span> Facebook</a></li>
+                <li><a href="#"><span class="icon"></span> Instagram</a></li>
+                <li><a href="#"><span class="icon"></span> LinkedIn</a></li>
+            </ul>
         </div>
-    </footer>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
+    </div>
+</footer>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/cart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!isLoggedIn()) {
-                showNotification('Vui lòng đăng nhập để tiếp tục!', 'warning');
-                window.location.href = '../login.html';
-                return;
-            }
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cart.js"></script>
+<script>
+    // State voucher
+    let appliedVoucher = null;
+    let currentItems = [];
+    let currentSubtotal = 0;
 
-            const user = getCurrentUser();
-            if (user) {
-                document.getElementById('fullName').value = user.fullName || '';
-                document.getElementById('email').value = user.email || '';
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!isLoggedIn()) {
+            showNotification('Vui lòng đăng nhập để tiếp tục!', 'warning');
+            window.location.href = '../login.html';
+            return;
+        }
 
-            const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
-            const cart = getCart();
-            const items = cart.filter(item => checkoutIds.includes(item.productId));
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('fullName').value = user.fullName || '';
+            document.getElementById('email').value = user.email || '';
+        }
 
-            if (!items.length) {
-                showNotification('Không tìm thấy sản phẩm để thanh toán. Vui lòng chọn lại trong giỏ hàng.', 'warning');
-                window.location.href = 'cart.html';
-                return;
-            }
+        const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+        const cart = getCart();
+        const items = cart.filter(item => checkoutIds.includes(item.productId));
 
-            renderOrderSummary(items);
+        if (!items.length) {
+            showNotification('Không tìm thấy sản phẩm để thanh toán. Vui lòng chọn lại trong giỏ hàng.', 'warning');
+            window.location.href = 'cart.html';
+            return;
+        }
 
-            document.getElementById('placeOrderBtn').addEventListener('click', function() {
-                handlePlaceOrder(items);
-            });
+        currentItems = items;
+        currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        renderOrderSummary(items, 0);
+
+        document.getElementById('placeOrderBtn').addEventListener('click', function() {
+            handlePlaceOrder(items);
         });
 
-        function renderOrderSummary(items) {
-            const container = document.getElementById('orderItemsSummary');
-            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const discount = 0;
-            const finalAmount = subtotal - discount;
+        // Enter để áp dụng voucher
+        document.getElementById('voucherInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') applyVoucher();
+        });
+    });
 
-            container.innerHTML = items.map(item => `
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:0.75rem;">
-                    <div style="flex:1; margin-right: 0.75rem;">
-                        <div style="font-weight:500;">${item.productName}</div>
-                        <div style="font-size:0.85rem; color:#718096;">Số lượng: ${item.quantity}</div>
-                    </div>
-                    <div style="text-align:right; white-space:nowrap;">
-                        <div style="font-weight:600;">${formatCurrency(item.price * item.quantity)}</div>
-                        <div style="font-size:0.8rem; color:#718096;">${formatCurrency(item.price)}</div>
-                    </div>
+    function renderOrderSummary(items, discountAmount) {
+        const container = document.getElementById('orderItemsSummary');
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const finalAmount = subtotal - discountAmount;
+
+        container.innerHTML = items.map(item => `
+            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:0.75rem;">
+                <div style="flex:1; margin-right: 0.75rem;">
+                    <div style="font-weight:500;">${item.productName}</div>
+                    <div style="font-size:0.85rem; color:#718096;">Số lượng: ${item.quantity}</div>
                 </div>
-            `).join('');
+                <div style="text-align:right; white-space:nowrap;">
+                    <div style="font-weight:600;">${formatCurrency(item.price * item.quantity)}</div>
+                    <div style="font-size:0.8rem; color:#718096;">${formatCurrency(item.price)}</div>
+                </div>
+            </div>
+        `).join('');
 
-            document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
-            document.getElementById('discountAmount').textContent = formatCurrency(discount);
-            document.getElementById('finalAmount').textContent = formatCurrency(finalAmount);
+        document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
+        document.getElementById('discountAmount').textContent = discountAmount > 0
+            ? `-${formatCurrency(discountAmount)}`
+            : formatCurrency(0);
+        document.getElementById('finalAmount').textContent = formatCurrency(Math.max(0, finalAmount));
+    }
+
+    async function applyVoucher() {
+        const code = document.getElementById('voucherInput').value.trim().toUpperCase();
+        const resultEl = document.getElementById('voucherResult');
+
+        if (!code) {
+            resultEl.className = 'voucher-result error';
+            resultEl.textContent = 'Vui lòng nhập mã voucher';
+            return;
         }
 
-        async function handlePlaceOrder(items) {
-            const fullName = document.getElementById('fullName').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const note = document.getElementById('note').value.trim();
+        const user = getCurrentUser();
+        if (!user) return;
 
-            if (!fullName || !phone || !address) {
-                showNotification('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.', 'warning');
-                return;
-            }
+        // Lấy customerId từ API
+        try {
+            const customer = await fetchGet(`${API_BASE_URL}/customers/user/${user.userId}`);
+            const customerId = customer.id;
 
-            const user = getCurrentUser();
-            if (!user || !user.userId) {
-                showNotification('Không tìm thấy thông tin tài khoản. Vui lòng đăng nhập lại.', 'error');
-                window.location.href = '../login.html';
-                return;
-            }
+            const voucher = await fetchGet(
+                `${API_BASE_URL}/coupons/validate?code=${code}&customerId=${customerId}`
+            );
 
-            const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const discount = 0;
-            const finalAmount = subtotal - discount;
+            // Tính tiền giảm
+            const percentDiscount = Math.round(currentSubtotal * voucher.discountPercent / 100);
+            const discountAmount = Math.min(percentDiscount, voucher.maxDiscountAmount);
 
-            const orderItems = items.map(item => ({
-                productId: item.productId,
-                price: item.price,
-                quantity: item.quantity,
-                subtotal: item.price * item.quantity
-            }));
+            appliedVoucher = { ...voucher, discountAmount };
 
-            const payload = {
-                customerId: user.userId,
-                shippingAddress: address,
-                shippingPhone: phone,
-                note: note,
-                totalAmount: subtotal,
-                discountAmount: discount,
-                finalAmount: finalAmount,
-                orderItems: orderItems
-            };
+            // Cập nhật UI
+            resultEl.className = 'voucher-result success';
+            resultEl.textContent = `✓ Áp dụng thành công! Giảm ${voucher.discountPercent}%, tối đa ${formatCurrency(voucher.maxDiscountAmount)}`;
 
-            const btn = document.getElementById('placeOrderBtn');
-            btn.disabled = true;
-            btn.textContent = 'Đang tạo đơn hàng...';
+            document.getElementById('voucherCodeDisplay').textContent = `(${code})`;
+            document.getElementById('removeVoucherBtn').style.display = 'inline-block';
+            document.getElementById('voucherInput').disabled = true;
 
-            try {
-                await fetchPost(API_ENDPOINTS.ORDERS + '/checkout', payload);
+            renderOrderSummary(currentItems, discountAmount);
 
-                const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
-                let cart = getCart();
-                cart = cart.filter(item => !checkoutIds.includes(item.productId));
-                saveCart(cart);
-                localStorage.removeItem('checkoutItems');
-
-                showNotification('Đặt hàng thành công! 🎉', 'success');
-                setTimeout(() => {
-                    window.location.href = 'my-orders.html';
-                }, 1500);
-            } catch (error) {
-                console.error(error);
-                showNotification('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.', 'error');
-                btn.disabled = false;
-                btn.textContent = '✅ Đặt hàng';
-            }
+        } catch (e) {
+            resultEl.className = 'voucher-result error';
+            resultEl.textContent = e.message || 'Mã giảm giá không hợp lệ';
+            appliedVoucher = null;
         }
-    </script>
+    }
+
+    function removeVoucher() {
+        appliedVoucher = null;
+        document.getElementById('voucherInput').value = '';
+        document.getElementById('voucherInput').disabled = false;
+        document.getElementById('voucherResult').className = 'voucher-result';
+        document.getElementById('voucherResult').textContent = '';
+        document.getElementById('voucherCodeDisplay').textContent = '';
+        document.getElementById('removeVoucherBtn').style.display = 'none';
+        renderOrderSummary(currentItems, 0);
+    }
+
+    async function handlePlaceOrder(items) {
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const note = document.getElementById('note').value.trim();
+
+        if (!fullName || !phone || !address) {
+            showNotification('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.', 'warning');
+            return;
+        }
+
+        const user = getCurrentUser();
+        if (!user || !user.userId) {
+            showNotification('Không tìm thấy thông tin tài khoản. Vui lòng đăng nhập lại.', 'error');
+            window.location.href = '../login.html';
+            return;
+        }
+
+        // Lấy customerId thật từ API
+        let customerId;
+        try {
+            const customer = await fetchGet(`${API_BASE_URL}/customers/user/${user.userId}`);
+            customerId = customer.id;
+        } catch (e) {
+            showNotification('Không tìm thấy thông tin khách hàng. Vui lòng liên hệ hỗ trợ.', 'error');
+            return;
+        }
+
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const discountAmount = appliedVoucher ? appliedVoucher.discountAmount : 0;
+        const finalAmount = Math.max(0, subtotal - discountAmount);
+
+        const orderItems = items.map(item => ({
+            productId: item.productId,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity
+        }));
+
+        const payload = {
+            customerId: customerId,
+            shippingAddress: address,
+            shippingPhone: phone,
+            note: note,
+            totalAmount: subtotal,
+            discountAmount: discountAmount,
+            finalAmount: finalAmount,
+            orderItems: orderItems
+        };
+
+        const btn = document.getElementById('placeOrderBtn');
+        btn.disabled = true;
+        btn.textContent = 'Đang tạo đơn hàng...';
+
+        try {
+            await fetchPost(API_ENDPOINTS.ORDERS + '/checkout', payload);
+
+            const checkoutIds = JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+            let cart = getCart();
+            cart = cart.filter(item => !checkoutIds.includes(item.productId));
+            saveCart(cart);
+            localStorage.removeItem('checkoutItems');
+
+            showNotification('Đặt hàng thành công! 🎉', 'success');
+            setTimeout(() => { window.location.href = 'my-orders.html'; }, 1500);
+        } catch (error) {
+            console.error(error);
+            showNotification('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Đặt hàng';
+        }
+    }
+</script>
 </body>
 </html>

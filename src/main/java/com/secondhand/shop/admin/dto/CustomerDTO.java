@@ -21,7 +21,8 @@ public class CustomerDTO {
     private String district;
     private String ward;
     private Integer totalOrders;
-    private Double totalSpent;  // ✅ ĐỔI
+    private Double totalSpent;
+    private String rank;
 
     public static CustomerDTO fromEntity(Customer customer) {
         return CustomerDTO.builder()
@@ -37,6 +38,7 @@ public class CustomerDTO {
                 .ward(customer.getWard())
                 .totalOrders(customer.getTotalOrders())
                 .totalSpent(customer.getTotalSpent() != null ? customer.getTotalSpent().doubleValue() : 0.0)
+                .rank(customer.getRank().name())
                 .build();
     }
 }

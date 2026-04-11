@@ -2,19 +2,29 @@
 // FETCH API HELPER FUNCTIONS
 // ===================================
 
+function getAuthHeaders() {
+    let token = null;
+    try {
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            token = JSON.parse(currentUser).token;
+        }
+    } catch (e) {}
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+}
+
 async function fetchGet(url) {
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         return await response.json();
     } catch (error) {
         console.error('GET Error:', error);
@@ -25,7 +35,7 @@ async function fetchGet(url) {
 async function fetchPost(url, data) {
     const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
     if (!response.ok) {
@@ -39,16 +49,12 @@ async function fetchPut(url, data) {
     try {
         const response = await fetch(url, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(data)
         });
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         return await response.json();
     } catch (error) {
         console.error('PUT Error:', error);
@@ -60,15 +66,11 @@ async function fetchDelete(url) {
     try {
         const response = await fetch(url, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         return true;
     } catch (error) {
         console.error('DELETE Error:', error);
@@ -76,22 +78,14 @@ async function fetchDelete(url) {
     }
 }
 
-// Show notification
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
-    
+    setTimeout(() => { notification.classList.add('show'); }, 100);
     setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
+        setTimeout(() => { document.body.removeChild(notification); }, 300);
     }, 3000);
 }

@@ -1,8 +1,13 @@
+app:
+  jwt:
+    secret: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    expiration-ms: 86400000
+
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/secondhand_shop?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/secondhand_shop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: 170205
+    password: 15052005
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

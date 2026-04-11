@@ -7,6 +7,7 @@ import com.secondhand.shop.common.repository.RoleRepository;
 import com.secondhand.shop.common.repository.UserRepository;
 import com.secondhand.shop.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -53,10 +55,9 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + userDTO.getRoleId()));
 
-        // Create user (Note: In production, password should be hashed!)
         User user = User.builder()
                 .username(userDTO.getUsername())
-                .password(userDTO.getPassword()) // TODO: Hash password with BCrypt
+                .password(passwordEncoder.encode(userDTO.getPassword()))
                 .email(userDTO.getEmail())
                 .fullName(userDTO.getFullName())
                 .phone(userDTO.getPhone())
