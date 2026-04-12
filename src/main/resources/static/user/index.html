@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🛍️</span>
+                    <span>Secondhand Shop</span>
+                </a>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html" class="active">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+    <a href="cart.html" class="cart-wrapper-minimal">
+        <svg class="cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span class="cart-badge-minimal" id="cartBadge">0</span>
+    </a>
+    
+    <div id="userMenu">
+        </div>
+</div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Secondhand Shop</h1>
+            <p>Nơi mua bán đồ cũ uy tín, chất lượng, giá rẻ</p>
+            
+            <div class="search-box">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Tìm kiếm sản phẩm..."
+                       onkeypress="handleSearchKeypress(event)">
+                <button onclick="searchProducts()">Tìm kiếm</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <h2 class="section-title">Sản phẩm mới nhất</h2>
+        
+        <div id="productsContainer" class="products-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Đang tải sản phẩm...</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="products.html" class="btn btn-primary">
+                Xem tất cả sản phẩm →
+            </a>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+            <footer class="shopee-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>DỊCH VỤ KHÁCH HÀNG</h3>
+                <ul>
+                    <li><a href="#">Trung tâm Trợ giúp</a></li>
+                    <li><a href="#">Blog Mua Sắm</a></li>
+                    <li><a href="#">Cửa hàng Chính hãng</a></li>
+                    <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
+                    <li><a href="#">Hướng dẫn bán hàng</a></li>
+                    <li><a href="#">Thanh toán trực tuyến</a></li>
+                    <li><a href="#">Điểm thưởng</a></li>
+                    <li><a href="#">Đơn Hàng</a></li>
+                    <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
+                    <li><a href="#">Liên Hệ Chúng Tôi</a></li>
+                    <li><a href="#">Chính Sách Bảo Hành</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>VỀ CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Tuyển dụng</a></li>
+                    <li><a href="#">Điều Khoản</a></li>
+                    <li><a href="#">Chính Sách Bảo Mật</a></li>
+                    <li><a href="#">Kênh Người Bán</a></li>
+                    <li><a href="#">Flash Sale</a></li>
+                    <li><a href="#">Tiếp Thị Liên Kết</a></li>
+                    <li><a href="#">Liên Hệ Truyền Thông</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>THANH TOÁN</h3>
+                <div class="payment-methods">
+                    <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
+                    <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
+                    <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
+                </div>
+                <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
+                <div class="shipping-methods">
+                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>THEO DÕI CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#"><span class="icon"></span> Facebook</a></li>
+                    <li><a href="#"><span class="icon"></span> Instagram</a></li>
+                    <li><a href="#"><span class="icon"></span> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
+            <p style="margin-top: 0.5rem; color: #888; font-size: 0.8rem;">Quốc gia &amp; Khu vực: Singapore | Indonesia | Thái Lan | Malaysia | Việt Nam | Philippines | Brazil | México | Đài Loan</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        // Load products on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadLatestProducts();
+        });
+
+        // Load latest products
+        async function loadLatestProducts() {
+            try {
+                const products = await fetchGet(API_ENDPOINTS.PRODUCTS_LATEST);
+                renderProducts(products.slice(0, 8));
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsContainer').innerHTML = 
+                    '<p style="text-align: center;">Lỗi khi tải sản phẩm</p>';
+            }
+        }
+
+        // Render products
+        function renderProducts(products) {
+            const container = document.getElementById('productsContainer');
+            
+            if (products.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">Chưa có sản phẩm nào</p>';
+                return;
+            }
+
+            container.innerHTML = products.map(product => {
+                const discount = product.originalPrice ? 
+                    Math.round((1 - product.price / product.originalPrice) * 100) : 0;
+                
+                return `
+                    <div class="product-card" onclick="viewProductDetail(${product.id})">
+                        ${discount > 0 ? `<div class="product-badge">-${discount}%</div>` : ''}
+                        <div class="product-image-wrapper">
+                            <img src="${product.imageUrl || '../images/placeholder.png'}" 
+                                 alt="${product.name}" 
+                                 class="product-image">
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">${product.categoryName}</div>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-price-section">
+                                <span class="product-price">${formatCurrency(product.price)}</span>
+                                ${product.originalPrice ? `
+                                    <span class="product-original-price">${formatCurrency(product.originalPrice)}</span>
+                                ` : ''}
+                            </div>
+                            <div style="margin-top: 10px; text-align: center;">
+                                <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price}, '${product.imageUrl || ''}')">
+                                    🛒 Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewProductDetail(id) {
+            window.location.href = `product-detail.html?id=${id}`;
+        }
+
+        function searchProducts() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (keyword) {
+                window.location.href = `products.html?search=${encodeURIComponent(keyword)}`;
+            }
+        }
+
+        function handleSearchKeypress(event) {
+            if (event.key === 'Enter') {
+                searchProducts();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+    <style>
+        .auth-container {
+            max-width: 700px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+<header class="main-header">
+    <div class="header-container">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>Secondhand Shop</span>
+            </a>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="header-right">
+            <a href="cart.html" class="cart-icon">
+                🛒
+                <span class="cart-badge" id="cartBadge">0</span>
+            </a>
+            
+            <div id="userMenu">
+                <!-- User menu hoặc guest menu sẽ được load bởi auth.js -->
+            </div>
+        </div>
+    </div>
+</header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+        <div class="auth-container">
+            <h1 class="auth-title">Đăng ký tài khoản</h1>
+            
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Thông tin đăng nhập</h3>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="username">Tên đăng nhập <span style="color: red;">*</span></label>
+                        <input type="text" 
+                               id="username" 
+                               placeholder="Nhập tên đăng nhập" 
+                               required
+                               autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email <span style="color: red;">*</span></label>
+                        <input type="email" 
+                               id="email" 
+                               placeholder="email@example.com" 
+                               required
+                               autocomplete="email">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="password">Mật khẩu <span style="color: red;">*</span></label>
+                        <input type="password" 
+                               id="password" 
+                               placeholder="Nhập mật khẩu" 
+                               required
+                               autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Xác nhận mật khẩu <span style="color: red;">*</span></label>
+                        <input type="password" 
+                               id="confirmPassword" 
+                               placeholder="Nhập lại mật khẩu" 
+                               required
+                               autocomplete="new-password">
+                    </div>
+                </div>
+
+                <h3 style="margin: 1.5rem 0 1rem 0; color: var(--primary-color);">Thông tin cá nhân</h3>
+
+                <div class="form-group">
+                    <label for="fullName">Họ và tên <span style="color: red;">*</span></label>
+                    <input type="text" 
+                           id="fullName" 
+                           placeholder="Nguyễn Văn A" 
+                           required
+                           autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="tel" 
+                           id="phone" 
+                           placeholder="0912345678"
+                           autocomplete="tel">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <textarea id="address" 
+                              placeholder="Số nhà, tên đường"
+                              rows="2"
+                              autocomplete="street-address"></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="city">Thành phố</label>
+                        <input type="text" 
+                               id="city" 
+                               placeholder="Hà Nội"
+                               autocomplete="address-level1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">Quận/Huyện</label>
+                        <input type="text" 
+                               id="district" 
+                               placeholder="Hoàn Kiếm"
+                               autocomplete="address-level2">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        ✅ Đăng ký
+                    </button>
+                </div>
+
+                <div class="text-center mt-2">
+                    <p>Đã có tài khoản? <a href="login.html" style="color: var(--primary-color); font-weight: bold;">Đăng nhập ngay</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+            <footer class="shopee-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>DỊCH VỤ KHÁCH HÀNG</h3>
+                <ul>
+                    <li><a href="#">Trung tâm Trợ giúp</a></li>
+                    <li><a href="#">Blog Mua Sắm</a></li>
+                    <li><a href="#">Cửa hàng Chính hãng</a></li>
+                    <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
+                    <li><a href="#">Hướng dẫn bán hàng</a></li>
+                    <li><a href="#">Thanh toán trực tuyến</a></li>
+                    <li><a href="#">Điểm thưởng</a></li>
+                    <li><a href="#">Đơn Hàng</a></li>
+                    <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
+                    <li><a href="#">Liên Hệ Chúng Tôi</a></li>
+                    <li><a href="#">Chính Sách Bảo Hành</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>VỀ CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Tuyển dụng</a></li>
+                    <li><a href="#">Điều Khoản</a></li>
+                    <li><a href="#">Chính Sách Bảo Mật</a></li>
+                    <li><a href="#">Kênh Người Bán</a></li>
+                    <li><a href="#">Flash Sale</a></li>
+                    <li><a href="#">Tiếp Thị Liên Kết</a></li>
+                    <li><a href="#">Liên Hệ Truyền Thông</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>THANH TOÁN</h3>
+                <div class="payment-methods">
+                    <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
+                    <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
+                    <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
+                </div>
+                <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
+                <div class="shipping-methods">
+                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>THEO DÕI CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#"><span class="icon"></span> Facebook</a></li>
+                    <li><a href="#"><span class="icon"></span> Instagram</a></li>
+                    <li><a href="#"><span class="icon"></span> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
+            <p style="margin-top: 0.5rem; color: #888; font-size: 0.8rem;">Quốc gia &amp; Khu vực: Singapore | Indonesia | Thái Lan | Malaysia | Việt Nam | Philippines | Brazil | México | Đài Loan</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Kiểm tra nếu đã đăng nhập thì redirect
+        if (isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showNotification('Mật khẩu không khớp!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+                return;
+            }
+
+            const registerData = {
+                username: document.getElementById('username').value.trim(),
+                password: password,
+                email: document.getElementById('email').value.trim(),
+                fullName: document.getElementById('fullName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                district: document.getElementById('district').value.trim(),
+                ward: ''
+            };
+
+            if (!registerData.username || !registerData.email || !registerData.fullName) {
+                showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetchPost(API_ENDPOINTS.REGISTER, registerData);
+                
+                if (response) {
+                    showNotification('Đăng ký thành công! Đang chuyển hướng...', 'success');
+                    
+                    // Tự động đăng nhập
+                    saveUserData(response);
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showNotification('Đăng ký thất bại! ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khách hàng - Secondhand Shop</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-container">
+        <div class="logo">
+            <h1>🛍️ Secondhand Shop</h1>
+            <p>Hệ thống quản lý bán hàng 2hand</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="categories.html">Danh mục</a></li>
+                <li><a href="products.html">Sản phẩm</a></li>
+                <li><a href="orders.html">Đơn hàng</a></li>
+                <li><a href="customers.html" class="active">Khách hàng</a></li>
+                    <li><a href="#" onclick="logoutAdmin()" style="color:#ff4d4d">🚪 Đăng xuất</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="container">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title"> Quản lý khách hàng</h1>
+        </div>
+
+        <!-- STATISTICS -->
+        <div class="stats-container" style="margin-bottom: 1.5rem;">
+            <div class="stat-card">
+                <h3>Tổng khách hàng</h3>
+                <div class="stat-value" id="totalCustomers">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tổng đơn hàng</h3>
+                <div class="stat-value" id="totalOrders">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tổng chi tiêu</h3>
+                <div class="stat-value" id="totalSpent">0đ</div>
+            </div>
+            <div class="stat-card">
+                <h3>Trung bình/KH</h3>
+                <div class="stat-value" id="avgSpent">0đ</div>
+            </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="form-group">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Tìm kiếm khách hàng (tên, email, số điện thoại)..."
+                onkeyup="searchCustomers()"
+            >
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Tổng đơn</th>
+                        <th>Tổng chi tiêu</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                    <tr>
+                        <td colspan="8" class="loading">
+                            <div class="spinner"></div>
+                            <p>Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL: CUSTOMER DETAIL
+<div id="customerDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Chi tiết khách hàng</h2>
+            <button class="close-btn" onclick="closeCustomerDetailModal()">&times;</button>
+        </div>
+        <div id="customerDetailContent">
+             Nội dung load bằng JS 
+        </div>
+    </div>
+</div> -->
+
+<!-- MODAL: EDIT CUSTOMER -->
+<div id="customerEditModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Chỉnh sửa thông tin khách hàng</h2>
+            <button class="close-btn" onclick="closeCustomerEditModal()">&times;</button>
+        </div>
+
+        <form id="customerForm" onsubmit="submitCustomer(event)">
+            <input type="hidden" id="customerId">
+
+            <div class="form-group">
+                <label for="customerAddress">Địa chỉ</label>
+                <textarea id="customerAddress" placeholder="Nhập địa chỉ"></textarea>
+            </div>
+
+            <div class="grid grid-3">
+                <div class="form-group">
+                    <label for="customerCity">Thành phố</label>
+                    <input type="text" id="customerCity" placeholder="Hà Nội">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerDistrict">Quận/Huyện</label>
+                    <input type="text" id="customerDistrict" placeholder="Hoàn Kiếm">
+                </div>
+
+                <div class="form-group">
+                    <label for="customerWard">Phường/Xã</label>
+                    <input type="text" id="customerWard" placeholder="Hàng Bạc">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    💾 Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="./js/config.js"></script>
+    <script src="./js/auth.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/customers.js"></script>
+
+</body>
+</html>

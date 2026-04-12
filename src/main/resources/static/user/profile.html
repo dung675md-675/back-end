@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">🛍️</span>
+                    <span>Secondhand Shop</span>
+                </a>
+            </div>
+            <div class="header-right">
+                <div id="userMenu">
+                    </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div style="margin-bottom: 1.5rem;">
+            <a href="index.html" class="btn-back-home" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <span></span> Quay lại trang chủ
+            </a>
+        </div>
+
+        <div class="auth-container">
+            <h1 class="auth-title">Thông tin cá nhân</h1>
+            <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
+                Quản lý thông tin tài khoản và địa chỉ giao hàng của bạn
+            </p>
+            
+            <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" id="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Địa chỉ Email (Định danh)</label>
+                    <input type="email" id="email" class="form-control" disabled 
+                           style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
+                    <small style="color: var(--text-gray);">Email dùng để đăng nhập và không thể thay đổi.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ mặc định</label>
+                    <textarea id="address" class="form-control" rows="3" 
+                              placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..."></textarea>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+            <footer class="shopee-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>DỊCH VỤ KHÁCH HÀNG</h3>
+                <ul>
+                    <li><a href="#">Trung tâm Trợ giúp</a></li>
+                    <li><a href="#">Blog Mua Sắm</a></li>
+                    <li><a href="#">Cửa hàng Chính hãng</a></li>
+                    <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
+                    <li><a href="#">Hướng dẫn bán hàng</a></li>
+                    <li><a href="#">Thanh toán trực tuyến</a></li>
+                    <li><a href="#">Điểm thưởng</a></li>
+                    <li><a href="#">Đơn Hàng</a></li>
+                    <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
+                    <li><a href="#">Liên Hệ Chúng Tôi</a></li>
+                    <li><a href="#">Chính Sách Bảo Hành</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>VỀ CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Tuyển dụng</a></li>
+                    <li><a href="#">Điều Khoản</a></li>
+                    <li><a href="#">Chính Sách Bảo Mật</a></li>
+                    <li><a href="#">Kênh Người Bán</a></li>
+                    <li><a href="#">Flash Sale</a></li>
+                    <li><a href="#">Tiếp Thị Liên Kết</a></li>
+                    <li><a href="#">Liên Hệ Truyền Thông</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>THANH TOÁN</h3>
+                <div class="payment-methods">
+                    <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
+                    <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
+                    <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
+                </div>
+                <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
+                <div class="shipping-methods">
+                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>THEO DÕI CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#"><span class="icon"></span> Facebook</a></li>
+                    <li><a href="#"><span class="icon"></span> Instagram</a></li>
+                    <li><a href="#"><span class="icon"></span> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
+            <p style="margin-top: 0.5rem; color: #888; font-size: 0.8rem;">Quốc gia &amp; Khu vực: Singapore | Indonesia | Thái Lan | Malaysia | Việt Nam | Philippines | Brazil | México | Đài Loan</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bảo mật: Nếu chưa đăng nhập thì đẩy ra trang login
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Đổ dữ liệu từ localStorage vào form
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('fullName').value = user.fullName || '';
+                document.getElementById('email').value = user.email || '';
+                // Nếu bạn có lưu phone và address trong token/session thì điền tiếp ở đây
+            }
+        });
+
+        async function handleUpdateProfile(event) {
+            event.preventDefault();
+            showNotification('Đang cập nhật thông tin...', 'warning');
+            
+            // Giả lập lưu thành công (Bạn cần viết API Put ở Backend sau)
+            setTimeout(() => {
+                showNotification('Cập nhật hồ sơ thành công!', 'success');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

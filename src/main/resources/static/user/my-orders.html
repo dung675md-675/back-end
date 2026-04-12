@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng của tôi - Secondhand Shop</title>
+    <link rel="stylesheet" href="css/user-style.css">
+    <style>
+        body { background: #f5f5f5; }
+
+        .orders-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px 16px 60px;
+        }
+
+        /* ===== PAGE HEADER + TABS ===== */
+        .orders-page-header {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .orders-page-title {
+            padding: 20px 24px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+
+        .status-tab {
+            padding: 12px 20px;
+            font-size: 0.88rem;
+            color: #777;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: color 0.2s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+
+        .status-tab:hover { color: #ee4d2d; }
+        .status-tab.active {
+            color: #ee4d2d;
+            border-bottom-color: #ee4d2d;
+            font-weight: 600;
+        }
+
+        /* ===== ORDER CARD ===== */
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .order-card-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .order-code { font-size: 0.85rem; color: #888; }
+        .order-code span { color: #333; font-weight: 600; }
+
+        .order-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Delivery bar */
+        .order-delivery-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: #fffaf9;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .delivery-date { font-weight: 600; color: #333; }
+
+        /* Item row */
+        .order-item-row {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap: 14px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .order-item-img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .order-item-info { flex: 1; min-width: 0; }
+
+        .order-item-name {
+            font-size: 0.9rem;
+            color: #222;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .order-item-qty { font-size: 0.82rem; color: #999; }
+
+        .order-item-price {
+            font-size: 0.9rem;
+            color: #555;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Card footer */
+        .order-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-top: 1px solid #f5f5f5;
+            background: #fafafa;
+        }
+
+        .order-total-label { font-size: 0.82rem; color: #999; margin-bottom: 2px; }
+        .order-total-value { font-size: 1.1rem; font-weight: 700; color: #ee4d2d; }
+
+        .order-actions { display: flex; gap: 10px; }
+
+        .btn-rebuy {
+            background: #ee4d2d;
+            color: white;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-rebuy:hover { background: #d73211; }
+
+        .btn-review {
+            background: white;
+            color: #555;
+            border: 1px solid #ddd;
+            padding: 9px 22px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-review:hover { border-color: #ee4d2d; color: #ee4d2d; }
+
+        /* Empty */
+        .empty-orders {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .empty-orders-icon { font-size: 4rem; margin-bottom: 16px; }
+        .empty-orders h3 { color: #555; margin-bottom: 8px; }
+        .empty-orders p { color: #999; font-size: 0.9rem; margin-bottom: 24px; }
+
+        .btn-shop {
+            background: #ee4d2d;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Loading */
+        .loading-state {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            background: white;
+            border-radius: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .spinner-sm {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #eee;
+            border-top-color: #ee4d2d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="main-header">
+    <div class="header-container">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>Secondhand Shop</span>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-right">
+            <a href="cart.html" class="cart-wrapper-minimal">
+                <svg class="cart-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-badge-minimal" id="cartBadge">0</span>
+            </a>
+            <div id="userMenu"></div>
+        </div>
+    </div>
+</header>
+
+<div class="orders-wrapper">
+    <div class="orders-page-header">
+        <div class="orders-page-title">Đơn hàng của tôi</div>
+        <div class="status-tabs">
+            <button class="status-tab active" onclick="filterOrders('ALL', this)">Tất cả</button>
+            <button class="status-tab" onclick="filterOrders('PENDING', this)">Chờ xác nhận</button>
+            <button class="status-tab" onclick="filterOrders('CONFIRMED', this)">Đã xác nhận</button>
+            <button class="status-tab" onclick="filterOrders('SHIPPING', this)">Đang giao</button>
+            <button class="status-tab" onclick="filterOrders('DELIVERED', this)">Hoàn thành</button>
+            <button class="status-tab" onclick="filterOrders('CANCELLED', this)">Đã hủy</button>
+        </div>
+    </div>
+
+    <div id="ordersContainer">
+        <div class="loading-state">
+            <div class="spinner-sm"></div>
+            <p>Đang tải đơn hàng...</p>
+        </div>
+    </div>
+</div>
+
+        <footer class="shopee-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>DỊCH VỤ KHÁCH HÀNG</h3>
+                <ul>
+                    <li><a href="#">Trung tâm Trợ giúp</a></li>
+                    <li><a href="#">Blog Mua Sắm</a></li>
+                    <li><a href="#">Cửa hàng Chính hãng</a></li>
+                    <li><a href="#">Hướng dẫn mua hàng/Đặt hàng</a></li>
+                    <li><a href="#">Hướng dẫn bán hàng</a></li>
+                    <li><a href="#">Thanh toán trực tuyến</a></li>
+                    <li><a href="#">Điểm thưởng</a></li>
+                    <li><a href="#">Đơn Hàng</a></li>
+                    <li><a href="#">Trả Hàng/Hoàn Tiền</a></li>
+                    <li><a href="#">Liên Hệ Chúng Tôi</a></li>
+                    <li><a href="#">Chính Sách Bảo Hành</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>VỀ CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Tuyển dụng</a></li>
+                    <li><a href="#">Điều Khoản</a></li>
+                    <li><a href="#">Chính Sách Bảo Mật</a></li>
+                    <li><a href="#">Kênh Người Bán</a></li>
+                    <li><a href="#">Flash Sale</a></li>
+                    <li><a href="#">Tiếp Thị Liên Kết</a></li>
+                    <li><a href="#">Liên Hệ Truyền Thông</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>THANH TOÁN</h3>
+                <div class="payment-methods">
+                    <img src="https://down-vn.img.susercontent.com/file/d4bbea4570b93bfd5fc652ca82a262a8" alt="Visa">
+                    <img src="https://down-vn.img.susercontent.com/file/a0a9062ebe19b45c1ae0506f16af5c16" alt="Mastercard">
+                    <img src="https://down-vn.img.susercontent.com/file/38fd98e55806c3b2e4535c4e4a6c4c08" alt="JCB">
+                </div>
+                <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
+                <div class="shipping-methods">
+                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
+                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>THEO DÕI CHÚNG TÔI</h3>
+                <ul>
+                    <li><a href="#"><span class="icon"></span> Facebook</a></li>
+                    <li><a href="#"><span class="icon"></span> Instagram</a></li>
+                    <li><a href="#"><span class="icon"></span> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Secondhand Shop. Tất cả các quyền được bảo lưu.</p>
+            <p style="margin-top: 0.5rem; color: #888; font-size: 0.8rem;">Quốc gia &amp; Khu vực: Singapore | Indonesia | Thái Lan | Malaysia | Việt Nam | Philippines | Brazil | México | Đài Loan</p>
+        </div>
+    </footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/cart.js"></script>
+<script>
+    let allOrders = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!isLoggedIn()) { window.location.href = '../login.html'; return; }
+        updateCartBadge();
+        loadUserOrders();
+    });
+
+    async function loadUserOrders() {
+        const user = getCurrentUser();
+        if (!user) { window.location.href = '../login.html'; return; }
+        try {
+            allOrders = await fetchGet(`${API_ENDPOINTS.ORDERS}/user/${user.userId}`);
+            renderOrders(allOrders);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('ordersContainer').innerHTML =
+                '<p style="text-align:center;color:#ee4d2d;padding:40px;">Lỗi tải đơn hàng. Vui lòng thử lại.</p>';
+        }
+    }
+
+    function filterOrders(status, tabEl) {
+        document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+        tabEl.classList.add('active');
+        const list = status === 'ALL' ? allOrders : allOrders.filter(o => o.status === status);
+        renderOrders(list);
+    }
+
+    function renderOrders(orders) {
+        const container = document.getElementById('ordersContainer');
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-orders">
+                    <div class="empty-orders-icon">📭</div>
+                    <h3>Chưa có đơn hàng nào</h3>
+                    <p>Hãy mua sắm và đặt hàng ngay!</p>
+                    <a href="products.html" class="btn-shop">Mua sắm ngay</a>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = orders.map(order => {
+            const si = getStatusInfo(order.status);
+            const dateStr = order.createdAt
+                ? new Date(order.createdAt).toLocaleDateString('vi-VN', {day:'2-digit', month:'long', year:'numeric'})
+                : '';
+
+            const deliveryInfo = getDeliveryInfo(order.status);
+            const items = (order.orderItems || []).map(item => `
+                <div class="order-item-row">
+                    <img src="${item.product?.imageUrl || 'images/placeholder.png'}"
+                         onerror="this.src='images/placeholder.png'"
+                         class="order-item-img" alt="${item.productName}">
+                    <div class="order-item-info">
+                        <div class="order-item-name">${item.productName}</div>
+                        <div class="order-item-qty">x${item.quantity}</div>
+                    </div>
+                    <div class="order-item-price">${formatCurrency(item.price)}</div>
+                </div>`).join('');
+
+            const actions = getActionButtons(order);
+
+            return `
+            <div class="order-card">
+                <div class="order-card-topbar">
+                    <div class="order-code">Mã đơn: <span>#${order.orderCode || order.id}</span></div>
+                    <div class="order-status-badge">
+                        <span class="status-dot" style="background:${si.color}"></span>
+                        <span style="color:${si.color}">${si.label}</span>
+                    </div>
+                </div>
+                <div class="order-delivery-bar">
+                    <span>${deliveryInfo.icon}</span>
+                    <span class="delivery-date">${dateStr}</span>
+                    <span style="color:#bbb;margin:0 4px">•</span>
+                    <span style="color:#888">${deliveryInfo.text}</span>
+                </div>
+                ${items}
+                <div class="order-card-footer">
+                    <div>
+                        <div class="order-total-label">Thành tiền</div>
+                        <div class="order-total-value">${formatCurrency(order.finalAmount || order.totalAmount)}</div>
+                    </div>
+                    <div class="order-actions">${actions}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function getDeliveryInfo(status) {
+        const map = {
+            'PENDING':   { icon: '⏳', text: 'Đang chờ shop xác nhận' },
+            'CONFIRMED': { icon: '✅', text: 'Shop đã xác nhận, chuẩn bị hàng' },
+            'SHIPPING':  { icon: '🚚', text: 'Đơn hàng đang trên đường giao' },
+            'DELIVERED': { icon: '📦', text: 'Kiện hàng đã được giao thành công' },
+            'CANCELLED': { icon: '❌', text: 'Đơn hàng đã bị hủy' },
+        };
+        return map[status] || { icon: '📋', text: '' };
+    }
+
+    function getStatusInfo(status) {
+        const map = {
+            'PENDING':   { label: 'Chờ xác nhận', color: '#f39c12' },
+            'CONFIRMED': { label: 'Đã xác nhận',  color: '#3498db' },
+            'SHIPPING':  { label: 'Đang giao',     color: '#8e44ad' },
+            'DELIVERED': { label: 'Hoàn thành',    color: '#27ae60' },
+            'CANCELLED': { label: 'Đã hủy',        color: '#e74c3c' },
+        };
+        return map[status] || { label: status, color: '#95a5a6' };
+    }
+
+    function getActionButtons(order) {
+        const itemsJson = JSON.stringify(order.orderItems || []).replace(/"/g, '&quot;');
+        if (order.status === 'DELIVERED') {
+            return `<button class="btn-review" onclick="alert('Tính năng đánh giá sẽ sớm ra mắt!')">Viết đánh giá</button>
+                    <button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`;
+        }
+        if (order.status === 'CANCELLED') {
+            return `<button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`;
+        }
+        return '';
+    }
+
+    function rebuyOrder(items) {
+        if (!items || items.length === 0) return;
+        items.forEach(item => {
+            if (item.product?.id) {
+                addToCart({
+                    productId: item.product.id,
+                    productName: item.productName,
+                    price: item.price,
+                    quantity: item.quantity,
+                    imageUrl: item.product.imageUrl || ''
+                });
+            }
+        });
+        showNotification('Đã thêm vào giỏ hàng!', 'success');
+        setTimeout(() => { window.location.href = 'cart.html'; }, 1000);
+    }
+</script>
+</body>
+</html>
