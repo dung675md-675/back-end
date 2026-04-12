@@ -86,7 +86,7 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
                         .requestMatchers("/api/user/**")
                         .hasAnyRole("ADMIN", "CUSTOMER")
-                        .requestMatchers(HttpMethod.GET, "/api/coupons/validate").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/coupons/validate", "/api/coupons/me").authenticated()
                         .requestMatchers("/api/coupons/**").hasRole("ADMIN")
                         .anyRequest()
                         .authenticated())

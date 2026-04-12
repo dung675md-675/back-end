@@ -2,6 +2,7 @@ package com.secondhand.shop.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.secondhand.shop.common.model.Coupon.CustomerRank;
+import com.secondhand.shop.common.support.CustomerRankSupport;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -60,11 +61,12 @@ public class Customer {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public CustomerLevel getLevel() {
+        return CustomerRankSupport.resolveLevel(totalSpent);
+    }
+
     public CustomerRank getRank() {
-        if (totalSpent == null || totalSpent < 1_000_000) return CustomerRank.BRONZE;
-        if (totalSpent < 5_000_000)  return CustomerRank.SILVER;
-        if (totalSpent < 20_000_000) return CustomerRank.GOLD;
-        if (totalSpent < 50_000_000) return CustomerRank.PLATINUM;
-        return CustomerRank.DIAMOND;
+        return CustomerRankSupport.resolveCouponRank(totalSpent);
     }
 }

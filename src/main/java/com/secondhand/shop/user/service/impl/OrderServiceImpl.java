@@ -1,12 +1,18 @@
 package com.secondhand.shop.user.service.impl;
 
+import com.secondhand.shop.common.model.Coupon;
+import com.secondhand.shop.common.model.CouponAssignment;
 import com.secondhand.shop.common.model.Customer;
 import com.secondhand.shop.common.model.Order;
 import com.secondhand.shop.common.model.OrderItem;
 import com.secondhand.shop.common.model.Product;
+import com.secondhand.shop.common.repository.CouponAssignmentRepository;
+import com.secondhand.shop.common.repository.CouponRepository;
 import com.secondhand.shop.common.repository.CustomerRepository;
 import com.secondhand.shop.common.repository.OrderRepository;
 import com.secondhand.shop.common.repository.ProductRepository;
+import com.secondhand.shop.common.support.CouponSupport;
+import com.secondhand.shop.common.support.CustomerRankSupport;
 import com.secondhand.shop.user.dto.OrderRequestDTO;
 import com.secondhand.shop.user.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -25,47 +31,63 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final CouponRepository couponRepository;
+    private final CouponAssignmentRepository couponAssignmentRepository;
 
     @Override
     @Transactional
     public Object createOrder(OrderRequestDTO request) {
-        // Customer có field "user" (object), dùng findByUser_Id
         Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy customer với userId: " + request.getCustomerId()));
+                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng v?i id: " + request.getCustomerId()));
 
         Order order = new Order();
         order.setCustomer(customer);
         order.setOrderCode("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        order.setUserId(customer.getUser().getId());
+        order.setFullName(customer.getUser().getFullName());
+        order.setPhone(request.getShippingPhone());
+        order.setAddress(request.getShippingAddress());
         order.setShippingAddress(request.getShippingAddress());
         order.setShippingPhone(request.getShippingPhone());
         order.setNote(request.getNote());
-        order.setTotalAmount(request.getTotalAmount());
-        order.setDiscountAmount(request.getDiscountAmount() != null ? request.getDiscountAmount() : 0.0);
-        order.setFinalAmount(request.getFinalAmount() != null ? request.getFinalAmount() : request.getTotalAmount());
         order.setStatus(Order.OrderStatus.PENDING);
 
         List<OrderItem> orderItems = new ArrayList<>();
+        double subtotal = 0.0;
         for (OrderRequestDTO.OrderItemRequestDTO itemDTO : request.getOrderItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm id: " + itemDTO.getProductId()));
+                    .orElseThrow(() -> new RuntimeException("Không t?m th?y s?n ph?m id: " + itemDTO.getProductId()));
+
+            double itemSubtotal = product.getPrice() * itemDTO.getQuantity();
+            subtotal += itemSubtotal;
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setProductName(product.getName());
-            orderItem.setPrice(itemDTO.getPrice());
+            orderItem.setPrice(product.getPrice());
             orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setSubtotal(itemDTO.getSubtotal());
+            orderItem.setSubtotal(itemSubtotal);
             orderItems.add(orderItem);
         }
 
+        Coupon coupon = resolveCoupon(request.getCouponId(), customer, subtotal);
+        double discountAmount = coupon != null ? CouponSupport.calculateDiscountAmount(coupon, subtotal) : 0.0;
+        double finalAmount = Math.max(0.0, subtotal - discountAmount);
+
+        order.setCoupon(coupon);
+        order.setCouponCode(coupon != null ? coupon.getCode() : null);
+        order.setCouponName(coupon != null ? coupon.getName() : null);
+        order.setTotalAmount(subtotal);
+        order.setDiscountAmount(discountAmount);
+        order.setFinalAmount(finalAmount);
         order.setOrderItems(orderItems);
+
         return orderRepository.save(order);
     }
 
     @Override
     public List<?> getOrdersByUserId(Long userId) {
-        // Dùng query JOIN FETCH qua customer.user.id
         return orderRepository.findByCustomerUserIdWithItems(userId);
     }
 
@@ -73,4 +95,41 @@ public class OrderServiceImpl implements OrderService {
     public Object getOrderDetail(Long orderId) {
         return orderRepository.findById(orderId).orElse(null);
     }
+
+    private Coupon resolveCoupon(Long couponId, Customer customer, double subtotal) {
+        if (couponId == null) {
+            return null;
+        }
+
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new RuntimeException("Không t?m th?y voucher đ? ch?n"));
+
+        if (!CouponSupport.isActiveAt(coupon, LocalDateTime.now())) {
+            throw new RuntimeException("Voucher đ? ch?n không c?n hi?u l?c");
+        }
+
+        List<CouponAssignment> assignments = couponAssignmentRepository.findByCouponId(couponId);
+        if (!assignments.isEmpty()) {
+            boolean matched = assignments.stream().anyMatch(assignment ->
+                    assignment.getCustomer() != null
+                            && assignment.getCustomer().getId().equals(customer.getId()));
+            if (!matched) {
+                matched = assignments.stream().anyMatch(assignment ->
+                        assignment.getAssignmentType() == CouponAssignment.AssignmentType.LEVEL
+                                && assignment.getTargetRank() == customer.getLevel());
+            }
+            if (!matched) {
+                throw new RuntimeException("Voucher này chưa đư?c g?n cho tài kho?n c?a b?n");
+            }
+        } else if (!CustomerRankSupport.meetsMinimumRank(customer.getTotalSpent(), coupon.getMinRank())) {
+            throw new RuntimeException("H?ng khách hàng c?a b?n chưa đ? đ? dùng voucher này");
+        }
+
+        if (coupon.getMinOrderAmount() != null && subtotal < coupon.getMinOrderAmount()) {
+            throw new RuntimeException("Đơn hàng chưa đ?t giá tr? t?i thi?u đ? áp d?ng voucher");
+        }
+
+        return coupon;
+    }
 }
+

@@ -27,7 +27,10 @@ const API_ENDPOINTS = {
     // Customers
     CUSTOMERS: `${API_BASE_URL}/customers`,
     CUSTOMER_BY_USER: (userId) => `${API_BASE_URL}/customers/user/${userId}`,
-    CUSTOMER_ME: `${API_BASE_URL}/customers/me`
+    CUSTOMER_ME: `${API_BASE_URL}/customers/me`,
+
+    // Coupons
+    COUPONS_ME: `${API_BASE_URL}/coupons/me`
 };
 
 // Format tiền VND

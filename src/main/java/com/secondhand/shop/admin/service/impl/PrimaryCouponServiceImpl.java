@@ -13,6 +13,7 @@ import com.secondhand.shop.common.repository.CustomerRepository;
 import com.secondhand.shop.common.support.CouponSupport;
 import com.secondhand.shop.common.support.CustomerRankSupport;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 @Transactional
-public class CouponServiceImpl implements CouponService {
+public class PrimaryCouponServiceImpl implements CouponService {
 
     private final CouponRepository couponRepository;
     private final CouponAssignmentRepository couponAssignmentRepository;

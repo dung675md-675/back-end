@@ -1,12 +1,29 @@
 package com.secondhand.shop.common.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "coupons")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Coupon {
 
     @Id
@@ -16,14 +33,24 @@ public class Coupon {
     @Column(nullable = false, unique = true, length = 50)
     private String code;
 
+    @Column(nullable = false, length = 200)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", nullable = false, length = 20)
+    private DiscountType discountType = DiscountType.PERCENT;
+
     @Column(name = "discount_percent", nullable = false)
-    private Integer discountPercent; // % giảm giá (vd: 10 = 10%)
+    private Integer discountPercent = 0;
+
+    @Column(name = "fixed_discount_amount")
+    private Double fixedDiscountAmount = 0.0;
 
     @Column(name = "max_discount_amount", nullable = false)
-    private Double maxDiscountAmount; // Số tiền giảm tối đa
+    private Double maxDiscountAmount = 0.0;
 
     @Column(name = "min_order_amount")
-    private Double minOrderAmount = 0.0; // Đơn tối thiểu để dùng
+    private Double minOrderAmount = 0.0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "min_rank", nullable = false)
@@ -33,6 +60,9 @@ public class Coupon {
     @Column(nullable = false)
     private CouponStatus status = CouponStatus.ACTIVE;
 
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
     @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
 
@@ -40,15 +70,47 @@ public class Coupon {
     private LocalDateTime createdAt;
 
     @PrePersist
-    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (name == null || name.isBlank()) {
+            name = code;
+        }
+        if (startDate == null) {
+            startDate = LocalDateTime.now();
+        }
+        if (discountType == null) {
+            discountType = DiscountType.PERCENT;
+        }
+        if (discountPercent == null) {
+            discountPercent = 0;
+        }
+        if (fixedDiscountAmount == null) {
+            fixedDiscountAmount = 0.0;
+        }
+        if (maxDiscountAmount == null) {
+            maxDiscountAmount = 0.0;
+        }
+        if (minOrderAmount == null) {
+            minOrderAmount = 0.0;
+        }
+    }
 
-    public enum CouponStatus { ACTIVE, INACTIVE }
+    public enum CouponStatus {
+        ACTIVE,
+        INACTIVE
+    }
+
+    public enum DiscountType {
+        PERCENT,
+        FIXED_AMOUNT
+    }
 
     public enum CustomerRank {
-        BRONZE,    // < 1 triệu
-        SILVER,    // 1 - 5 triệu
-        GOLD,      // 5 - 20 triệu
-        PLATINUM,  // 20 - 50 triệu
-        DIAMOND    // > 50 triệu
+        BRONZE,
+        SILVER,
+        GOLD,
+        PLATINUM,
+        DIAMOND
     }
 }
+

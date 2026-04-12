@@ -1,17 +1,19 @@
 package com.secondhand.shop.admin.service.impl;
 
 import com.secondhand.shop.admin.dto.CustomerDTO;
+import com.secondhand.shop.admin.service.CustomerService;
 import com.secondhand.shop.common.model.CouponAssignment;
 import com.secondhand.shop.common.model.Customer;
-import com.secondhand.shop.common.repository.CouponAssignmentRepository;
 import com.secondhand.shop.common.model.User;
+import com.secondhand.shop.common.repository.CouponAssignmentRepository;
 import com.secondhand.shop.common.repository.CustomerRepository;
 import com.secondhand.shop.common.repository.UserRepository;
-import com.secondhand.shop.admin.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +21,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 @Transactional
-public class CustomerServiceImpl implements CustomerService {
+public class PrimaryCustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CouponAssignmentRepository couponAssignmentRepository;
@@ -69,7 +72,8 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setWard(customerDTO.getWard());
 
         Customer updatedCustomer = customerRepository.save(customer);
-        return CustomerDTO.fromEntity(updatedCustomer);
+        return CustomerDTO.fromEntity(updatedCustomer, buildAssignmentMap(List.of(updatedCustomer))
+                .getOrDefault(updatedCustomer.getId(), List.of()));
     }
 
     @Override
@@ -82,11 +86,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO createCustomerWithUser(Long userId, CustomerDTO customerDTO) {
-        // Validate user exists
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // Check if customer already exists for this user
         if (customerRepository.existsByUserId(userId)) {
             throw new RuntimeException("Customer already exists for user id: " + userId);
         }
@@ -117,11 +119,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         List<CouponAssignment> directAssignments = couponAssignmentRepository.findByCustomerIdIn(customerIds);
         directAssignments.forEach(assignment -> assignmentMap
-                .computeIfAbsent(assignment.getCustomer().getId(), key -> new java.util.ArrayList<>())
+                .computeIfAbsent(assignment.getCustomer().getId(), key -> new ArrayList<>())
                 .add(assignment.getCoupon().getCode()));
 
-        List<CouponAssignment> allAssignments = couponAssignmentRepository.findAll();
-        List<CouponAssignment> levelAssignments = allAssignments.stream()
+        List<CouponAssignment> levelAssignments = couponAssignmentRepository.findAll().stream()
                 .filter(assignment -> assignment.getAssignmentType() == CouponAssignment.AssignmentType.LEVEL)
                 .toList();
 
@@ -129,7 +130,7 @@ public class CustomerServiceImpl implements CustomerService {
             for (CouponAssignment assignment : levelAssignments) {
                 if (assignment.getTargetRank() == customer.getLevel()) {
                     assignmentMap
-                            .computeIfAbsent(customer.getId(), key -> new java.util.ArrayList<>())
+                            .computeIfAbsent(customer.getId(), key -> new ArrayList<>())
                             .add(assignment.getCoupon().getCode());
                 }
             }

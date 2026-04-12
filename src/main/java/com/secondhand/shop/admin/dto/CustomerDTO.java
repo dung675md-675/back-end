@@ -3,6 +3,9 @@ package com.secondhand.shop.admin.dto;
 import com.secondhand.shop.common.model.Customer;
 import lombok.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,8 +26,13 @@ public class CustomerDTO {
     private Integer totalOrders;
     private Double totalSpent;
     private String rank;
+    private List<String> assignedCoupons;
 
     public static CustomerDTO fromEntity(Customer customer) {
+        return fromEntity(customer, Collections.emptyList());
+    }
+
+    public static CustomerDTO fromEntity(Customer customer, List<String> assignedCoupons) {
         return CustomerDTO.builder()
                 .id(customer.getId())
                 .userId(customer.getUser().getId())
@@ -38,7 +46,8 @@ public class CustomerDTO {
                 .ward(customer.getWard())
                 .totalOrders(customer.getTotalOrders())
                 .totalSpent(customer.getTotalSpent() != null ? customer.getTotalSpent().doubleValue() : 0.0)
-                .rank(customer.getRank().name())
+                .rank(customer.getLevel().name())
+                .assignedCoupons(assignedCoupons)
                 .build();
     }
 }

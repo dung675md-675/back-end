@@ -184,3 +184,28 @@ document.addEventListener('DOMContentLoaded', function() {
     updateAuthUI();
     updateCartBadge();
 });
+
+Object.assign(RANK_INFO, {
+    BRONZE: { label: 'Dong', icon: 'B', color: '#a0522d', bg: '#fdf0e6' },
+    SILVER: { label: 'Bac', icon: 'S', color: '#808080', bg: '#f0f0f0' },
+    GOLD: { label: 'Vang', icon: 'G', color: '#b8860b', bg: '#fffbe6' },
+    PLATINUM: { label: 'Bach kim', icon: 'P', color: '#1565c0', bg: '#e8f4fd' },
+    DIAMOND: { label: 'Kim cuong', icon: 'D', color: '#6a1b9a', bg: '#f3e5f5' },
+    VIP_A: { label: 'VIP A', icon: 'A', color: '#00897b', bg: '#e0f2f1' },
+    VIP_S: { label: 'VIP S', icon: 'S+', color: '#ef6c00', bg: '#fff3e0' },
+    VIP_SS: { label: 'VIP SS', icon: 'SS', color: '#c62828', bg: '#ffebee' },
+    VIP_SSS: { label: 'VIP SSS', icon: 'SSS', color: '#283593', bg: '#e8eaf6' }
+});
+
+function calculateRank(totalSpent) {
+    const spent = totalSpent || 0;
+    if (spent < 1000000) return 'BRONZE';
+    if (spent < 5000000) return 'SILVER';
+    if (spent < 10000000) return 'GOLD';
+    if (spent < 15000000) return 'PLATINUM';
+    if (spent < 20000000) return 'DIAMOND';
+    if (spent < 30000000) return 'VIP_A';
+    if (spent < 50000000) return 'VIP_S';
+    if (spent < 100000000) return 'VIP_SS';
+    return 'VIP_SSS';
+}
