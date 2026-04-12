@@ -93,12 +93,13 @@
     }
     
     .table-actions {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: nowrap;
         gap: 0.3rem;
     }
     
     .table-actions .btn {
-        width: 100%;
+        width: auto;
         font-size: 0.8rem;
     }
     

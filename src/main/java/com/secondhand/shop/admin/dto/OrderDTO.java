@@ -24,6 +24,8 @@ public class OrderDTO {
     private String shippingAddress;
     private String shippingPhone;
     private String note;
+    private String couponCode;
+    private String couponName;
     private List<OrderItemDTO> orderItems;
     private String createdAt;
 
@@ -33,8 +35,10 @@ public class OrderDTO {
         return OrderDTO.builder()
                 .id(order.getId())
                 .orderCode(order.getOrderCode())
-                .customerId(order.getCustomer().getId())
-                .customerName(order.getCustomer().getUser().getFullName())
+                .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
+                .customerName(order.getCustomer() != null && order.getCustomer().getUser() != null
+                        ? order.getCustomer().getUser().getFullName()
+                        : order.getFullName())
                 .totalAmount(order.getTotalAmount())
                 .discountAmount(order.getDiscountAmount())
                 .finalAmount(order.getFinalAmount())
@@ -42,6 +46,8 @@ public class OrderDTO {
                 .shippingAddress(order.getShippingAddress())
                 .shippingPhone(order.getShippingPhone())
                 .note(order.getNote())
+                .couponCode(order.getCouponCode())
+                .couponName(order.getCouponName())
                 .createdAt(order.getCreatedAt() != null
                         ? order.getCreatedAt().toString()
                         : null)

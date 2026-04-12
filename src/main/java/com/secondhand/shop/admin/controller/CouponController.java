@@ -74,21 +74,6 @@ public class CouponController {
                 .body(couponService.assignCouponToLevel(couponId, request.getRank()));
     }
 
-    @PostMapping("/{couponId}/assign/customer")
-    public ResponseEntity<CouponAssignmentDTO> assignCouponToCustomer(
-            @PathVariable Long couponId,
-            @RequestBody CouponAssignmentRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(couponService.assignCouponToCustomer(couponId, request.getCustomerId()));
-    }
-
-    @PostMapping("/assign/customer/bulk")
-    public ResponseEntity<List<CouponAssignmentDTO>> assignCouponsToCustomer(
-            @RequestBody CouponAssignmentRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(couponService.assignCouponsToCustomer(request.getCustomerId(), request.getCouponIds()));
-    }
-
     @GetMapping("/validate")
     public ResponseEntity<?> validateCoupon(@RequestParam String code, @RequestParam Long customerId) {
         try {

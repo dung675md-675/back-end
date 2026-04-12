@@ -10,13 +10,11 @@ const CUSTOMER_LEVEL_META = {
     VIP_SSS: { label: 'VIP SSS', color: '#283593', bg: '#e8eaf6' }
 };
 
-const DISCOUNT_TYPE_LABELS = {
-    PERCENT: 'Phần trăm',
-    FIXED_AMOUNT: 'Số tiền cố định'
-};
-
 const CUSTOMER_LEVELS = Object.keys(CUSTOMER_LEVEL_META);
+
 let customersData = [];
+let couponsData = [];
+let pendingCouponPayload = null;
 
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
@@ -31,10 +29,10 @@ function showNotification(message, type = 'success') {
 }
 
 function injectEnhancedCustomerStyles() {
-    if (document.getElementById('enhancedCustomerStyles')) return;
+    if (document.getElementById('enhancedCustomerStylesV2')) return;
 
     const style = document.createElement('style');
-    style.id = 'enhancedCustomerStyles';
+    style.id = 'enhancedCustomerStylesV2';
     style.textContent = `
         .voucher-panel {
             background: #fff;
@@ -95,8 +93,7 @@ function injectEnhancedCustomerStyles() {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
         }
-        .level-option,
-        .coupon-option {
+        .level-option {
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 12px;
@@ -105,18 +102,15 @@ function injectEnhancedCustomerStyles() {
             gap: 10px;
             align-items: flex-start;
         }
-        .level-option input,
-        .coupon-option input {
+        .level-option input {
             width: auto;
             margin-top: 2px;
         }
-        .level-option strong,
-        .coupon-option strong {
+        .level-option strong {
             display: block;
             margin-bottom: 4px;
         }
-        .level-option small,
-        .coupon-option small {
+        .level-option small {
             color: #6b7280;
             display: block;
             line-height: 1.4;
@@ -140,50 +134,103 @@ function injectEnhancedCustomerStyles() {
             color: #64748b;
             font-size: 12px;
         }
-        .assign-btn {
-            display: none !important;
-        }
         .table-actions {
             display: flex;
             gap: 8px;
             flex-wrap: nowrap;
             white-space: nowrap;
         }
-        .modal.show {
-            display: flex;
+        .voucher-list-section {
+            margin-top: 22px;
+            border-top: 1px solid #ececec;
+            padding-top: 18px;
+        }
+        .voucher-list-section h4 {
+            margin: 0 0 12px;
+            font-size: 16px;
+            color: #1f2937;
+        }
+        .voucher-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .voucher-table th,
+        .voucher-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            vertical-align: top;
+        }
+        .voucher-table th {
+            background: #f8fafc;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .voucher-code {
+            font-family: monospace;
+            font-weight: 700;
+            color: #4338ca;
+            background: #eef2ff;
+            border-radius: 6px;
+            padding: 2px 8px;
+            display: inline-block;
+        }
+        .voucher-confirm-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
+            padding: 16px;
         }
-        .assign-modal-box {
-            width: min(760px, calc(100vw - 32px));
-            max-height: calc(100vh - 48px);
-            overflow-y: auto;
+        .voucher-confirm-modal.show {
+            display: flex;
+        }
+        .voucher-confirm-box {
+            width: min(680px, 100%);
+            max-height: 90vh;
+            overflow: auto;
             background: #fff;
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+            border-radius: 14px;
+            padding: 18px;
         }
-        .assign-modal-box h3 {
-            margin: 0 0 8px;
+        .voucher-confirm-box h3 {
+            margin: 0 0 10px;
+            color: #111827;
         }
-        .assign-modal-box p {
-            margin: 0 0 16px;
-            color: #64748b;
+        .voucher-summary-grid {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 8px 10px;
+            font-size: 14px;
+            margin-top: 10px;
         }
-        .assign-modal-actions {
+        .voucher-summary-grid .k {
+            color: #6b7280;
+        }
+        .voucher-summary-grid .v {
+            color: #111827;
+            font-weight: 600;
+        }
+        .confirm-actions {
+            margin-top: 16px;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 18px;
-        }
-        .inline-hint {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 6px;
+            flex-wrap: wrap;
         }
         @media (max-width: 900px) {
             .voucher-grid,
             .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            .voucher-summary-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -200,10 +247,7 @@ function renderAssignedCoupons(customer) {
     if (!customer.assignedCoupons || customer.assignedCoupons.length === 0) {
         return '<span class="empty-badge">Chưa có voucher nào</span>';
     }
-
-    return customer.assignedCoupons
-        .map(code => `<span class="coupon-badge">${code}</span>`)
-        .join('');
+    return customer.assignedCoupons.map(code => `<span class="coupon-badge">${code}</span>`).join('');
 }
 
 function injectVoucherManagementPanel() {
@@ -216,15 +260,15 @@ function injectVoucherManagementPanel() {
     wrapper.id = 'customerVoucherControls';
     wrapper.className = 'voucher-panel';
     wrapper.innerHTML = `
-        <h3>Tạo voucher mới và áp dụng theo hạng khách hàng</h3>
+        <h3>Tạo voucher mới và áp dụng theo level khách hàng</h3>
         <p>
-            Khi tạo voucher, bạn có thể chọn nhiều hạng khách hàng cùng lúc.
-            Hệ thống sẽ tự động gắn voucher này cho toàn bộ khách hàng thuộc các hạng được chọn.
+            Voucher sẽ được gắn tự động theo level đã chọn. Bạn không thể sửa/xóa voucher ở đây,
+            vì vậy hệ thống có bước xác nhận trước khi lưu.
         </p>
         <div class="voucher-grid">
             <div>
                 <label for="adminCouponName">Tên voucher</label>
-                <input id="adminCouponName" type="text" placeholder="Ví dụ: Ưu đãi khách hàng VIP tháng 4">
+                <input id="adminCouponName" type="text" placeholder="Ví dụ: Ưu đãi VIP tháng 4">
             </div>
             <div>
                 <label for="adminCouponCode">Mã voucher</label>
@@ -251,7 +295,7 @@ function injectVoucherManagementPanel() {
                 <input id="adminCouponEndDate" type="datetime-local">
             </div>
             <div>
-                <label for="adminMinOrderValue">Giá trị đơn hàng tối thiểu(VND)</label>
+                <label for="adminMinOrderValue">Giá trị đơn hàng tối thiểu (VNĐ)</label>
                 <input id="adminMinOrderValue" type="number" min="0" step="1000" placeholder="Ví dụ: 500000">
             </div>
             <div class="full">
@@ -269,7 +313,7 @@ function injectVoucherManagementPanel() {
                             <input type="checkbox" name="targetLevels" value="${level}" onchange="handleSingleLevelToggle()">
                             <span>
                                 <strong>${CUSTOMER_LEVEL_META[level].label}</strong>
-                                <small>Tự động gắn voucher cho toàn bộ khách hàng thuộc hạng này.</small>
+                                <small>Tự động gắn voucher cho khách hàng thuộc level này.</small>
                             </span>
                         </label>
                     `).join('')}
@@ -277,12 +321,60 @@ function injectVoucherManagementPanel() {
             </div>
         </div>
         <div class="voucher-actions">
-            <button class="btn btn-primary" onclick="createAdminCustomerCoupon()">Tạo voucher</button>
+            <button class="btn btn-primary" onclick="openVoucherConfirmModal()">Tiếp tục</button>
+        </div>
+        <div class="voucher-list-section">
+            <h4>Danh sách voucher hiện có</h4>
+            <div class="table-container">
+                <table class="voucher-table">
+                    <thead>
+                        <tr>
+                            <th>Tên voucher</th>
+                            <th>Mã</th>
+                            <th>Mức giảm</th>
+                            <th>Đơn tối thiểu</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Áp dụng cho level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminCouponTableBody">
+                        <tr><td colspan="7">Đang tải danh sách voucher...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     `;
 
     stats.insertAdjacentElement('afterend', wrapper);
     toggleDiscountInputLabel();
+}
+
+function injectVoucherConfirmModal() {
+    if (document.getElementById('voucherConfirmModal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'voucherConfirmModal';
+    modal.className = 'voucher-confirm-modal';
+    modal.innerHTML = `
+        <div class="voucher-confirm-box">
+            <h3>Xác nhận thông tin voucher</h3>
+            <p style="margin:0;color:#6b7280;">Kiểm tra lại thông tin trước khi lưu vì voucher sẽ tự động gắn theo level.</p>
+            <div id="voucherConfirmSummary" class="voucher-summary-grid"></div>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeVoucherConfirmModal()">Quay lại chỉnh sửa</button>
+                <button id="confirmSaveVoucherBtn" class="btn btn-primary" type="button" onclick="confirmCreateAdminCustomerCoupon()">Xác nhận & Lưu</button>
+            </div>
+        </div>
+    `;
+
+    modal.addEventListener('click', event => {
+        if (event.target === modal) {
+            closeVoucherConfirmModal();
+        }
+    });
+
+    document.body.appendChild(modal);
 }
 
 function toggleDiscountInputLabel() {
@@ -325,18 +417,43 @@ function handleSingleLevelToggle() {
     if (!allCheckbox) return;
 
     const levelCheckboxes = Array.from(document.querySelectorAll('input[name="targetLevels"]:not([value="ALL"])'));
-    if (allCheckbox.checked) {
-        const allChecked = levelCheckboxes.every(checkbox => checkbox.checked);
-        if (!allChecked) {
-            allCheckbox.checked = false;
-            levelCheckboxes.forEach(checkbox => {
-                checkbox.disabled = false;
-            });
-        }
+    if (!allCheckbox.checked) return;
+
+    const allChecked = levelCheckboxes.every(checkbox => checkbox.checked);
+    if (!allChecked) {
+        allCheckbox.checked = false;
+        levelCheckboxes.forEach(checkbox => {
+            checkbox.disabled = false;
+        });
     }
 }
 
-async function createAdminCustomerCoupon() {
+function formatDateCell(dateString) {
+    if (!dateString) return '-';
+    try {
+        return formatDate(dateString);
+    } catch (error) {
+        return dateString;
+    }
+}
+
+function resolveTargetLevelLabel(levels) {
+    if (!Array.isArray(levels) || levels.length === 0) return '-';
+    if (levels.includes('ALL')) return 'Tất cả';
+    return levels
+        .map(level => CUSTOMER_LEVEL_META[level]?.label || level)
+        .join(', ');
+}
+
+function resolveDiscountLabel(coupon) {
+    if (coupon.discountLabel) return coupon.discountLabel;
+    if (coupon.discountType === 'FIXED_AMOUNT') {
+        return `Giảm ${formatCurrency(coupon.fixedDiscountAmount || 0)}`;
+    }
+    return `Giảm ${coupon.discountPercent || 0}%`;
+}
+
+function collectCouponFormData() {
     const name = document.getElementById('adminCouponName')?.value.trim();
     const code = document.getElementById('adminCouponCode')?.value.trim().toUpperCase();
     const discountType = document.getElementById('adminDiscountType')?.value || 'PERCENT';
@@ -344,29 +461,28 @@ async function createAdminCustomerCoupon() {
     const startDate = document.getElementById('adminCouponStartDate')?.value;
     const endDate = document.getElementById('adminCouponEndDate')?.value;
     const minOrderValue = parseFloat(document.getElementById('adminMinOrderValue')?.value || '0');
-    const selectedLevels = Array.from(document.querySelectorAll('input[name="targetLevels"]:checked'))
-        .map(input => input.value);
+    const selectedLevels = Array.from(document.querySelectorAll('input[name="targetLevels"]:checked')).map(input => input.value);
     const targetLevels = selectedLevels.includes('ALL') ? ['ALL'] : selectedLevels;
 
     if (!name || !code) {
         showNotification('Vui lòng nhập đầy đủ tên voucher và mã voucher.', 'warning');
-        return;
+        return null;
     }
     if (!discountValue || discountValue <= 0) {
         showNotification('Vui lòng nhập mức giảm hợp lệ.', 'warning');
-        return;
+        return null;
     }
     if (!startDate || !endDate) {
         showNotification('Vui lòng chọn ngày bắt đầu và ngày kết thúc.', 'warning');
-        return;
+        return null;
     }
     if (new Date(startDate) >= new Date(endDate)) {
         showNotification('Ngày kết thúc phải lớn hơn ngày bắt đầu.', 'warning');
-        return;
+        return null;
     }
     if (targetLevels.length === 0) {
         showNotification('Vui lòng chọn ít nhất một level để áp dụng.', 'warning');
-        return;
+        return null;
     }
 
     const payload = {
@@ -383,23 +499,122 @@ async function createAdminCustomerCoupon() {
         targetLevels
     };
 
+    return {
+        payload,
+        summary: {
+            name,
+            code,
+            discount: discountType === 'PERCENT'
+                ? `${Math.round(discountValue)}%`
+                : formatCurrency(discountValue),
+            minOrder: minOrderValue > 0 ? formatCurrency(minOrderValue) : 'Không yêu cầu',
+            startDate: formatDateCell(payload.startDate),
+            endDate: formatDateCell(payload.endDate),
+            levels: resolveTargetLevelLabel(targetLevels)
+        }
+    };
+}
+
+function openVoucherConfirmModal() {
+    const prepared = collectCouponFormData();
+    if (!prepared) return;
+
+    pendingCouponPayload = prepared.payload;
+    const summary = prepared.summary;
+    const summaryEl = document.getElementById('voucherConfirmSummary');
+    if (summaryEl) {
+        summaryEl.innerHTML = `
+            <div class="k">Tên voucher</div><div class="v">${summary.name}</div>
+            <div class="k">Mã voucher</div><div class="v">${summary.code}</div>
+            <div class="k">Mức giảm</div><div class="v">${summary.discount}</div>
+            <div class="k">Đơn tối thiểu</div><div class="v">${summary.minOrder}</div>
+            <div class="k">Ngày bắt đầu</div><div class="v">${summary.startDate}</div>
+            <div class="k">Ngày kết thúc</div><div class="v">${summary.endDate}</div>
+            <div class="k">Áp dụng cho level</div><div class="v">${summary.levels}</div>
+        `;
+    }
+
+    document.getElementById('voucherConfirmModal')?.classList.add('show');
+}
+
+function closeVoucherConfirmModal() {
+    document.getElementById('voucherConfirmModal')?.classList.remove('show');
+}
+
+async function confirmCreateAdminCustomerCoupon() {
+    if (!pendingCouponPayload) {
+        closeVoucherConfirmModal();
+        return;
+    }
+
+    const saveBtn = document.getElementById('confirmSaveVoucherBtn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Đang lưu...';
+    }
+
     try {
-        await fetchPost(`${API_BASE_URL}/coupons`, payload);
-        document.getElementById('adminCouponName').value = '';
-        document.getElementById('adminCouponCode').value = '';
-        document.getElementById('adminDiscountValue').value = '';
-        document.getElementById('adminCouponStartDate').value = '';
-        document.getElementById('adminCouponEndDate').value = '';
-        document.getElementById('adminMinOrderValue').value = '';
-        document.querySelectorAll('input[name="targetLevels"]').forEach(input => {
-            input.checked = false;
-            input.disabled = false;
-        });
-        await loadCustomers();
+        await fetchPost(`${API_BASE_URL}/coupons`, pendingCouponPayload);
+        resetVoucherForm();
+        closeVoucherConfirmModal();
+        pendingCouponPayload = null;
+        await Promise.all([loadCustomers(), loadCoupons()]);
         showNotification('Đã tạo voucher và gắn tự động theo level thành công.', 'success');
     } catch (error) {
         showNotification(error.message || 'Không thể tạo voucher mới.', 'error');
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Xác nhận & Lưu';
+        }
     }
+}
+
+function resetVoucherForm() {
+    document.getElementById('adminCouponName').value = '';
+    document.getElementById('adminCouponCode').value = '';
+    document.getElementById('adminDiscountValue').value = '';
+    document.getElementById('adminCouponStartDate').value = '';
+    document.getElementById('adminCouponEndDate').value = '';
+    document.getElementById('adminMinOrderValue').value = '';
+    document.querySelectorAll('input[name="targetLevels"]').forEach(input => {
+        input.checked = false;
+        input.disabled = false;
+    });
+}
+
+async function loadCoupons() {
+    const tbody = document.getElementById('adminCouponTableBody');
+    if (!tbody) return;
+
+    try {
+        couponsData = await fetchGet(`${API_BASE_URL}/coupons`);
+        renderCouponTable(couponsData);
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="7">Không thể tải danh sách voucher.</td></tr>';
+    }
+}
+
+function renderCouponTable(coupons) {
+    const tbody = document.getElementById('adminCouponTableBody');
+    if (!tbody) return;
+
+    if (!Array.isArray(coupons) || coupons.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">Chưa có voucher nào.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = coupons.map(coupon => `
+        <tr>
+            <td>${coupon.name || '-'}</td>
+            <td><span class="voucher-code">${coupon.code || '-'}</span></td>
+            <td>${resolveDiscountLabel(coupon)}</td>
+            <td>${(coupon.minOrderValue || coupon.minOrderAmount) ? formatCurrency(coupon.minOrderValue || coupon.minOrderAmount) : '-'}</td>
+            <td>${formatDateCell(coupon.startDate)}</td>
+            <td>${formatDateCell(coupon.endDate || coupon.expiryDate)}</td>
+            <td>${resolveTargetLevelLabel(coupon.targetLevels)}</td>
+        </tr>
+    `).join('');
 }
 
 async function loadCustomers() {
@@ -508,13 +723,18 @@ function getFullAddress(customer) {
 
 window.onclick = function(event) {
     const editModal = document.getElementById('customerEditModal');
+    const confirmModal = document.getElementById('voucherConfirmModal');
     if (event.target === editModal) {
         closeCustomerEditModal();
+    }
+    if (event.target === confirmModal) {
+        closeVoucherConfirmModal();
     }
 };
 
 document.addEventListener('DOMContentLoaded', async function() {
     injectEnhancedCustomerStyles();
     injectVoucherManagementPanel();
-    await loadCustomers();
+    injectVoucherConfirmModal();
+    await Promise.all([loadCustomers(), loadCoupons()]);
 });

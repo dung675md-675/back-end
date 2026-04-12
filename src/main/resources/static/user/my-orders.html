@@ -188,6 +188,22 @@
 
         .btn-review:hover { border-color: #ee4d2d; color: #ee4d2d; }
 
+        .btn-cancel-order {
+            background: white;
+            color: #d32f2f;
+            border: 1px solid #ef9a9a;
+            padding: 9px 18px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel-order:hover {
+            background: #ffebee;
+            border-color: #e57373;
+        }
+
         /* Empty */
         .empty-orders {
             text-align: center;
@@ -461,6 +477,9 @@
 
     function getActionButtons(order) {
         const itemsJson = JSON.stringify(order.orderItems || []).replace(/"/g, '&quot;');
+        if (order.status === 'PENDING') {
+            return `<button class="btn-cancel-order" onclick="cancelPendingOrder(${order.id})">Hủy đơn hàng</button>`;
+        }
         if (order.status === 'DELIVERED') {
             return `<button class="btn-review" onclick="alert('Tính năng đánh giá sẽ sớm ra mắt!')">Viết đánh giá</button>
                     <button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`;
@@ -469,6 +488,20 @@
             return `<button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`;
         }
         return '';
+    }
+
+    async function cancelPendingOrder(orderId) {
+        if (!confirm('Bạn có chắc muốn hủy đơn hàng này không?')) {
+            return;
+        }
+
+        try {
+            await fetchPost(`${API_ENDPOINTS.ORDERS}/${orderId}/cancel-by-user`, {});
+            showNotification('Đã hủy đơn hàng thành công.', 'success');
+            await loadUserOrders();
+        } catch (error) {
+            showNotification(error.message || 'Không thể hủy đơn hàng.', 'error');
+        }
     }
 
     function rebuyOrder(items) {
@@ -486,6 +519,163 @@
         });
         showNotification('Đã thêm vào giỏ hàng!', 'success');
         setTimeout(() => { window.location.href = 'cart.html'; }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        ensureRejectedStatusTab();
+        ensureOrderDetailModal();
+    });
+
+    function ensureRejectedStatusTab() {
+        const tabsContainer = document.querySelector('.status-tabs');
+        if (!tabsContainer || tabsContainer.querySelector('[data-status="REJECTED"]')) return;
+
+        const tab = document.createElement('button');
+        tab.className = 'status-tab';
+        tab.dataset.status = 'REJECTED';
+        tab.textContent = 'Từ chối';
+        tab.onclick = function() { filterOrders('REJECTED', tab); };
+        tabsContainer.appendChild(tab);
+    }
+
+    function ensureOrderDetailModal() {
+        if (document.getElementById('orderDetailModal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'orderDetailModal';
+        modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:16px;';
+        modal.innerHTML = `
+            <div style="background:#fff;width:min(920px,100%);max-height:90vh;overflow:auto;border-radius:10px;padding:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <h3 style="margin:0;font-size:18px;">Chi tiết đơn hàng</h3>
+                    <button type="button" onclick="closeOrderDetailModal()" style="border:none;background:none;font-size:22px;cursor:pointer;">&times;</button>
+                </div>
+                <div id="orderDetailContent"></div>
+            </div>
+        `;
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeOrderDetailModal();
+            }
+        });
+        document.body.appendChild(modal);
+    }
+
+    function getDeliveryInfo(status) {
+        const map = {
+            PENDING: { icon: '⏳', text: 'Đang chờ shop xác nhận' },
+            CONFIRMED: { icon: '✅', text: 'Shop đã xác nhận, chuẩn bị hàng' },
+            SHIPPING: { icon: '🚚', text: 'Đơn hàng đang trên đường giao' },
+            DELIVERED: { icon: '📦', text: 'Đơn hàng đã giao thành công' },
+            CANCELLED: { icon: '🛑', text: 'Bạn đã hủy đơn hàng này' },
+            REJECTED: { icon: '❌', text: 'Shop đã từ chối đơn hàng này' }
+        };
+        return map[status] || { icon: '📋', text: '' };
+    }
+
+    function getStatusInfo(status) {
+        const map = {
+            PENDING: { label: 'Chờ xác nhận', color: '#f39c12' },
+            CONFIRMED: { label: 'Đã xác nhận', color: '#3498db' },
+            SHIPPING: { label: 'Đang giao', color: '#8e44ad' },
+            DELIVERED: { label: 'Hoàn thành', color: '#27ae60' },
+            CANCELLED: { label: 'Đã hủy', color: '#7f8c8d' },
+            REJECTED: { label: 'Từ chối', color: '#c62828' }
+        };
+        return map[status] || { label: status, color: '#95a5a6' };
+    }
+
+    function getActionButtons(order) {
+        const itemsJson = JSON.stringify(order.orderItems || []).replace(/"/g, '&quot;');
+        const actions = [
+            `<button class="btn-review" onclick="viewOrderDetail(${order.id})">Xem chi tiết</button>`
+        ];
+
+        if (order.status === 'PENDING') {
+            actions.push(`<button class="btn-cancel-order" onclick="cancelPendingOrder(${order.id})">Hủy đơn hàng</button>`);
+        }
+        if (order.status === 'DELIVERED') {
+            actions.push(`<button class="btn-review" onclick="alert('Tính năng đánh giá sẽ sớm ra mắt!')">Viết đánh giá</button>`);
+            actions.push(`<button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`);
+        }
+        if (order.status === 'CANCELLED' || order.status === 'REJECTED') {
+            actions.push(`<button class="btn-rebuy" onclick='rebuyOrder(${itemsJson})'>Mua lại</button>`);
+        }
+
+        return actions.join('');
+    }
+
+    async function viewOrderDetail(orderId) {
+        ensureOrderDetailModal();
+        let order = allOrders.find(item => item.id === orderId);
+        try {
+            const detail = await fetchGet(`${API_ENDPOINTS.ORDERS}/user/detail/${orderId}`);
+            if (detail) order = detail;
+        } catch (error) {
+            console.warn('Fallback detail from list:', error);
+        }
+
+        if (!order) {
+            showNotification('Không thể tải chi tiết đơn hàng.', 'error');
+            return;
+        }
+
+        const statusInfo = getStatusInfo(order.status);
+        const voucherInfo = order.couponCode
+            ? `${order.couponCode}${order.couponName ? ` - ${order.couponName}` : ''}`
+            : 'Không áp dụng';
+
+        const itemsHtml = (order.orderItems || []).map(item => `
+            <tr>
+                <td style="padding:8px 6px;border-bottom:1px solid #eee;">${item.productName || '-'}</td>
+                <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;">${item.quantity || 0}</td>
+                <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;">${formatCurrency(item.price || 0)}</td>
+                <td style="padding:8px 6px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${formatCurrency(item.subtotal || 0)}</td>
+            </tr>
+        `).join('');
+
+        document.getElementById('orderDetailContent').innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px;">
+                <div><strong>Mã đơn:</strong> #${order.orderCode || order.id}</div>
+                <div><strong>Trạng thái:</strong> <span style="color:${statusInfo.color};font-weight:600;">${statusInfo.label}</span></div>
+                <div><strong>SĐT giao:</strong> ${order.shippingPhone || '-'}</div>
+                <div><strong>Ngày đặt:</strong> ${order.createdAt ? formatDate(order.createdAt) : '-'}</div>
+            </div>
+            <div style="margin-bottom:8px;"><strong>Địa chỉ giao hàng:</strong> ${order.shippingAddress || '-'}</div>
+            <div style="margin-bottom:12px;"><strong>Ghi chú:</strong> ${order.note || '-'}</div>
+
+            <div style="border:1px solid #eee;border-radius:8px;overflow:hidden;margin-bottom:12px;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                    <thead style="background:#fafafa;">
+                        <tr>
+                            <th style="padding:10px 6px;text-align:left;">Sản phẩm</th>
+                            <th style="padding:10px 6px;text-align:right;">SL</th>
+                            <th style="padding:10px 6px;text-align:right;">Đơn giá</th>
+                            <th style="padding:10px 6px;text-align:right;">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml || '<tr><td colspan="4" style="padding:12px;text-align:center;color:#777;">Không có sản phẩm</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="border-top:1px solid #eee;padding-top:10px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Tổng tiền hàng</span><strong>${formatCurrency(order.totalAmount || 0)}</strong></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Voucher</span><span>${voucherInfo}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Giảm giá</span><strong>- ${formatCurrency(order.discountAmount || 0)}</strong></div>
+                <div style="display:flex;justify-content:space-between;font-size:18px;"><strong>Thành tiền</strong><strong style="color:#ee4d2d;">${formatCurrency(order.finalAmount || order.totalAmount || 0)}</strong></div>
+            </div>
+        `;
+
+        document.getElementById('orderDetailModal').style.display = 'flex';
+    }
+
+    function closeOrderDetailModal() {
+        const modal = document.getElementById('orderDetailModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 </script>
 </body>

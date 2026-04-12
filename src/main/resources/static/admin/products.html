@@ -207,6 +207,12 @@
             cursor: pointer;
         }
         .btn-cancel-coupon:hover { background: #eee; }
+
+        /* Voucher management moved to customers page */
+        .coupon-section,
+        #couponModal {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -617,8 +623,7 @@
         if (e.target === this) closeCouponModal();
     });
 
-    // Load coupon khi trang khởi động
-    loadCoupons();
+    // Voucher management moved to customers page
 </script>
 </body>
 </html>

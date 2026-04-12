@@ -51,9 +51,13 @@
                     <h3>Đã giao</h3>
                     <div class="stat-value" id="deliveredOrders">0</div>
                 </div>
-                <div class="stat-card" style="border-left-color: var(--danger-color);">
+                <div class="stat-card" style="border-left-color: #7f8c8d;">
                     <h3>Đã hủy</h3>
                     <div class="stat-value" id="cancelledOrders">0</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #b71c1c;">
+                    <h3>Từ chối (Shop)</h3>
+                    <div class="stat-value" id="rejectedOrders">0</div>
                 </div>
             </div>
 
@@ -73,6 +77,7 @@
                         <option value="SHIPPING">Đang giao</option>
                         <option value="DELIVERED">Đã giao</option>
                         <option value="CANCELLED">Đã hủy</option>
+                        <option value="REJECTED">Từ chối</option>
                     </select>
                 </div>
             </div>

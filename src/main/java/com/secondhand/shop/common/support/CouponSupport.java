@@ -28,7 +28,7 @@ public final class CouponSupport {
             return 0.0;
         }
 
-        if (coupon.getMinOrderAmount() != null && subtotal < coupon.getMinOrderAmount()) {
+        if (coupon.getMinOrderValue() != null && subtotal < coupon.getMinOrderValue()) {
             return 0.0;
         }
 

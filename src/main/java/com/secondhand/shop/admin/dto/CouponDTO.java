@@ -24,6 +24,7 @@ public class CouponDTO {
     private Integer discountPercent;
     private Double fixedDiscountAmount;
     private Double maxDiscountAmount;
+    private Double minOrderValue;
     private Double minOrderAmount;
     private String minRank;
     private String status;
@@ -52,7 +53,8 @@ public class CouponDTO {
                 .discountPercent(coupon.getDiscountPercent())
                 .fixedDiscountAmount(coupon.getFixedDiscountAmount())
                 .maxDiscountAmount(coupon.getMaxDiscountAmount())
-                .minOrderAmount(coupon.getMinOrderAmount())
+                .minOrderValue(coupon.getMinOrderValue())
+                .minOrderAmount(coupon.getMinOrderValue())
                 .minRank(minRank.name())
                 .status(status.name())
                 .startDate(coupon.getStartDate() != null ? coupon.getStartDate().toString() : null)
@@ -61,5 +63,15 @@ public class CouponDTO {
                 .targetLevels(Collections.emptyList())
                 .discountLabel(CouponSupport.getDiscountLabel(coupon))
                 .build();
+    }
+
+    public Double resolveMinOrderValue() {
+        if (minOrderValue != null) {
+            return minOrderValue;
+        }
+        if (minOrderAmount != null) {
+            return minOrderAmount;
+        }
+        return 0.0;
     }
 }

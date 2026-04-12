@@ -203,6 +203,20 @@ tr:hover {
 .table-actions {
     display: flex;
     gap: 0.5rem;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    align-items: center;
+    min-width: 220px;
+}
+
+.table-actions .btn {
+    white-space: nowrap;
+}
+
+table th:last-child,
+table td:last-child {
+    white-space: nowrap;
+    min-width: 220px;
 }
 
 /* ===================================
@@ -534,4 +548,3 @@ textarea {
         padding: 1rem;
     }
 }
-

@@ -16,12 +16,4 @@ public interface CouponService {
     default CouponAssignmentDTO assignCouponToLevel(Long couponId, String rank) {
         throw new UnsupportedOperationException("assignCouponToLevel is not implemented");
     }
-
-    default CouponAssignmentDTO assignCouponToCustomer(Long couponId, Long customerId) {
-        throw new UnsupportedOperationException("assignCouponToCustomer is not implemented");
-    }
-
-    default List<CouponAssignmentDTO> assignCouponsToCustomer(Long customerId, List<Long> couponIds) {
-        throw new UnsupportedOperationException("assignCouponsToCustomer is not implemented");
-    }
 }

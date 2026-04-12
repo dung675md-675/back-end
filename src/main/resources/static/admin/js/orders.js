@@ -35,11 +35,16 @@ function calculateStatistics() {
         const shipping = ordersData.filter(o => o.status === 'SHIPPING').length;
         const delivered = ordersData.filter(o => o.status === 'DELIVERED').length;
         const cancelled = ordersData.filter(o => o.status === 'CANCELLED').length;
+        const rejected = ordersData.filter(o => o.status === 'REJECTED').length;
         
         document.getElementById('pendingOrders').textContent = pending;
         document.getElementById('shippingOrders').textContent = shipping;
         document.getElementById('deliveredOrders').textContent = delivered;
         document.getElementById('cancelledOrders').textContent = cancelled;
+        const rejectedElement = document.getElementById('rejectedOrders');
+        if (rejectedElement) {
+            rejectedElement.textContent = rejected;
+        }
     } catch (error) {
         console.error('Error calculating statistics:', error);
     }
@@ -73,7 +78,7 @@ function renderOrders(orders) {
                     </span>
                 </td>
                 <td>${order.createdAt ? formatDate(order.createdAt) : 'N/A'}</td>
-                <td class="table-actions" style="min-width: 250px;">
+                <td class="table-actions">
                     <button class="btn btn-secondary btn-sm" onclick="viewOrderDetail(${order.id})" title="Xem chi tiết">
                         👁️ Chi tiết
                     </button>
@@ -141,9 +146,15 @@ async function viewOrderDetail(id) {
     try {
         const order = await fetchGet(`${API_ENDPOINTS.ORDERS}/${id}`);
 
-        console.log('order.createdAt =', order.createdAt);
+        const createdAtText = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+        const voucherInfo = order.couponCode
+            ? `${order.couponCode}${order.couponName ? ` - ${order.couponName}` : ''}`
+            : 'KhĂ´ng Ă¡p dá»¥ng';
 
-        
+        const safeVoucherInfo = order.couponCode
+            ? `${order.couponCode}${order.couponName ? ` - ${order.couponName}` : ''}`
+            : 'Khong ap dung';
+
         const content = document.getElementById('orderDetailContent');
         content.innerHTML = `
             <div class="grid grid-2" style="gap: 1rem; margin-bottom: 1.5rem;">
@@ -171,7 +182,7 @@ async function viewOrderDetail(id) {
                 </div>
                 <div class="form-group">
                     <strong>Ngày đặt:</strong>
-                    <p>${formatDate(order.createdAt)}</p>
+                    <p>${createdAtText}</p>
                 </div>
             </div>
             
@@ -217,6 +228,10 @@ async function viewOrderDetail(id) {
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <strong>Giảm giá:</strong>
                     <span>-${formatCurrency(order.discountAmount)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>Voucher:</strong>
+                    <span>${safeVoucherInfo}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 1.2rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
                     <strong>Thành tiền:</strong>
@@ -338,7 +353,8 @@ function getOrderStatusBadgeClass(status) {
         'CONFIRMED': 'info',
         'SHIPPING': 'info',
         'DELIVERED': 'success',
-        'CANCELLED': 'danger'
+        'CANCELLED': 'secondary',
+        'REJECTED': 'danger'
     };
     return classes[status] || 'secondary';
 }
@@ -349,7 +365,8 @@ function getOrderStatusText(status) {
         'CONFIRMED': 'Đã xác nhận',
         'SHIPPING': 'Đang giao',
         'DELIVERED': 'Đã giao',
-        'CANCELLED': 'Đã hủy'
+        'CANCELLED': 'Đã hủy',
+        'REJECTED': 'Từ chối'
     };
     return texts[status] || status;
 }

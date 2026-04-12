@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Primary
@@ -45,7 +47,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
                     LocalDateTime rightTime = right.getCreatedAt() != null ? right.getCreatedAt() : LocalDateTime.MIN;
                     return rightTime.compareTo(leftTime);
                 })
-                .map(CouponDTO::fromEntity)
+                .map(this::toCouponDTO)
                 .collect(Collectors.toList());
     }
 
@@ -63,8 +65,8 @@ public class PrimaryCouponServiceImpl implements CouponService {
                 .discountPercent(resolveDiscountPercent(dto))
                 .fixedDiscountAmount(resolveFixedDiscountAmount(dto))
                 .maxDiscountAmount(resolveMaxDiscountAmount(dto))
-                .minOrderAmount(dto.getMinOrderAmount() != null ? dto.getMinOrderAmount() : 0.0)
-                .minRank(Coupon.CustomerRank.BRONZE)
+                .minOrderValue(dto.resolveMinOrderValue())
+                .minRank(resolveMinRank(dto))
                 .status(Coupon.CouponStatus.ACTIVE)
                 .startDate(parseDateTime(dto.getStartDate()))
                 .expiryDate(parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate())))
@@ -72,7 +74,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
 
         Coupon savedCoupon = couponRepository.save(coupon);
         assignCouponToLevelsInternal(savedCoupon, dto.getTargetLevels());
-        return CouponDTO.fromEntity(savedCoupon);
+        return toCouponDTO(savedCoupon);
     }
 
     @Override
@@ -86,14 +88,24 @@ public class PrimaryCouponServiceImpl implements CouponService {
         coupon.setDiscountPercent(resolveDiscountPercent(dto));
         coupon.setFixedDiscountAmount(resolveFixedDiscountAmount(dto));
         coupon.setMaxDiscountAmount(resolveMaxDiscountAmount(dto));
-        coupon.setMinOrderAmount(dto.getMinOrderAmount() != null ? dto.getMinOrderAmount() : 0.0);
+        coupon.setMinOrderValue(dto.resolveMinOrderValue());
+        coupon.setMinRank(resolveMinRank(dto));
         coupon.setStartDate(parseDateTime(dto.getStartDate()));
         coupon.setExpiryDate(parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate())));
         if (dto.getStatus() != null && !dto.getStatus().isBlank()) {
             coupon.setStatus(Coupon.CouponStatus.valueOf(dto.getStatus()));
         }
 
-        return CouponDTO.fromEntity(couponRepository.save(coupon));
+        Coupon savedCoupon = couponRepository.save(coupon);
+        if (dto.getTargetLevels() != null) {
+            couponAssignmentRepository.deleteByCouponIdAndAssignmentType(
+                    savedCoupon.getId(),
+                    CouponAssignment.AssignmentType.LEVEL
+            );
+            assignCouponToLevelsInternal(savedCoupon, dto.getTargetLevels());
+        }
+
+        return toCouponDTO(savedCoupon);
     }
 
     @Override
@@ -130,23 +142,29 @@ public class PrimaryCouponServiceImpl implements CouponService {
                 throw new RuntimeException("Voucher này chưa đư?c g?n cho tài kho?n c?a b?n");
             }
 
-            return CouponDTO.fromEntity(coupon);
+            return toCouponDTO(coupon);
         }
 
         if (!CustomerRankSupport.meetsMinimumRank(customer.getTotalSpent(), coupon.getMinRank())) {
             throw new RuntimeException("H?ng khách hàng c?a b?n chưa đ? đ? dùng voucher này");
         }
 
-        return CouponDTO.fromEntity(coupon);
+        return toCouponDTO(coupon);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CouponDTO> getAvailableCouponsForCustomer(Long customerId) {
-        customerRepository.findById(customerId)
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
 
-        return couponAssignmentRepository.findByCustomerId(customerId).stream()
+        List<CouponAssignment> directAssignments = couponAssignmentRepository.findByCustomerId(customerId);
+        List<CouponAssignment> levelAssignments = couponAssignmentRepository.findByAssignmentTypeAndTargetRank(
+                CouponAssignment.AssignmentType.LEVEL,
+                customer.getLevel()
+        );
+
+        return Stream.concat(directAssignments.stream(), levelAssignments.stream())
                 .map(CouponAssignment::getCoupon)
                 .filter(Objects::nonNull)
                 .filter(coupon -> CouponSupport.isActiveAt(coupon, LocalDateTime.now()))
@@ -154,7 +172,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
                         Collectors.toMap(Coupon::getId, coupon -> coupon, (first, ignored) -> first),
                         map -> map.values().stream()
                                 .sorted((left, right) -> left.getName().compareToIgnoreCase(right.getName()))
-                                .map(CouponDTO::fromEntity)
+                                .map(this::toCouponDTO)
                                 .toList()
                 ));
     }
@@ -172,7 +190,6 @@ public class PrimaryCouponServiceImpl implements CouponService {
         return CouponAssignmentDTO.fromEntity(createdAssignments.get(0));
     }
 
-    @Override
     public CouponAssignmentDTO assignCouponToCustomer(Long couponId, Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
@@ -183,7 +200,6 @@ public class PrimaryCouponServiceImpl implements CouponService {
         return CouponAssignmentDTO.fromEntity(assignment);
     }
 
-    @Override
     public List<CouponAssignmentDTO> assignCouponsToCustomer(Long customerId, List<Long> couponIds) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
@@ -217,8 +233,16 @@ public class PrimaryCouponServiceImpl implements CouponService {
         Set<String> normalizedLevels = targetLevels.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
+                .map(level -> level.toUpperCase(Locale.ROOT))
                 .filter(level -> !level.isEmpty())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (normalizedLevels.contains("ALL")) {
+            normalizedLevels.clear();
+            for (CustomerLevel level : CustomerLevel.values()) {
+                normalizedLevels.add(level.name());
+            }
+        }
 
         for (String level : normalizedLevels) {
             createAssignmentsForLevel(coupon, level);
@@ -227,15 +251,26 @@ public class PrimaryCouponServiceImpl implements CouponService {
 
     private List<CouponAssignment> createAssignmentsForLevel(Coupon coupon, String rank) {
         CustomerLevel targetRank = CustomerLevel.valueOf(rank.trim().toUpperCase(Locale.ROOT));
-        List<Customer> customers = customerRepository.findAll().stream()
-                .filter(customer -> customer.getLevel() == targetRank)
-                .toList();
-
-        List<CouponAssignment> assignments = new ArrayList<>();
-        for (Customer customer : customers) {
-            assignments.add(findOrCreateCustomerAssignment(customer, coupon));
+        boolean exists = couponAssignmentRepository.existsByCouponIdAndTargetRankAndAssignmentType(
+                coupon.getId(),
+                targetRank,
+                CouponAssignment.AssignmentType.LEVEL
+        );
+        if (exists) {
+            List<CouponAssignment> currentAssignments = couponAssignmentRepository.findByCouponId(coupon.getId());
+            return currentAssignments.stream()
+                    .filter(assignment -> assignment.getAssignmentType() == CouponAssignment.AssignmentType.LEVEL)
+                    .filter(assignment -> assignment.getTargetRank() == targetRank)
+                    .limit(1)
+                    .toList();
         }
-        return assignments;
+
+        CouponAssignment created = couponAssignmentRepository.save(CouponAssignment.builder()
+                .coupon(coupon)
+                .targetRank(targetRank)
+                .assignmentType(CouponAssignment.AssignmentType.LEVEL)
+                .build());
+        return List.of(created);
     }
 
     private CouponAssignment findOrCreateCustomerAssignment(Customer customer, Coupon coupon) {
@@ -294,6 +329,13 @@ public class PrimaryCouponServiceImpl implements CouponService {
         return dto.getMaxDiscountAmount() != null ? dto.getMaxDiscountAmount() : 0.0;
     }
 
+    private Coupon.CustomerRank resolveMinRank(CouponDTO dto) {
+        if (dto.getMinRank() != null && !dto.getMinRank().isBlank()) {
+            return Coupon.CustomerRank.valueOf(dto.getMinRank().trim().toUpperCase(Locale.ROOT));
+        }
+        return Coupon.CustomerRank.BRONZE;
+    }
+
     private LocalDateTime parseDateTime(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -306,6 +348,35 @@ public class PrimaryCouponServiceImpl implements CouponService {
             return first;
         }
         return second;
+    }
+
+    private CouponDTO toCouponDTO(Coupon coupon) {
+        CouponDTO dto = CouponDTO.fromEntity(coupon);
+        dto.setTargetLevels(resolveTargetLevels(coupon.getId()));
+        return dto;
+    }
+
+    private List<String> resolveTargetLevels(Long couponId) {
+        List<CouponAssignment> levelAssignments = couponAssignmentRepository.findByCouponId(couponId).stream()
+                .filter(assignment -> assignment.getAssignmentType() == CouponAssignment.AssignmentType.LEVEL)
+                .filter(assignment -> assignment.getTargetRank() != null)
+                .toList();
+
+        if (levelAssignments.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> levels = levelAssignments.stream()
+                .map(CouponAssignment::getTargetRank)
+                .distinct()
+                .sorted(Comparator.comparingInt(Enum::ordinal))
+                .map(Enum::name)
+                .toList();
+
+        if (levels.size() == CustomerLevel.values().length) {
+            return List.of("ALL");
+        }
+        return levels;
     }
 }
 

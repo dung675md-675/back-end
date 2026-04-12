@@ -174,7 +174,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStatus() == Order.OrderStatus.PENDING ||
                 order.getStatus() == Order.OrderStatus.CONFIRMED) {
 
-            order.setStatus(Order.OrderStatus.CANCELLED);
+            order.setStatus(Order.OrderStatus.REJECTED);
 
             // Return products to inventory
             for (OrderItem item : order.getOrderItems()) {

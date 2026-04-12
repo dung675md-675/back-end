@@ -10,4 +10,6 @@ public interface OrderService {
     List<?> getOrdersByUserId(Long userId);
 
     Object getOrderDetail(Long orderId);
+
+    Object cancelPendingOrder(Long orderId, Long userId);
 }

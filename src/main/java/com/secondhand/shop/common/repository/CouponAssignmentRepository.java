@@ -17,6 +17,11 @@ public interface CouponAssignmentRepository extends JpaRepository<CouponAssignme
 
     List<CouponAssignment> findByCustomerIdIn(Collection<Long> customerIds);
 
+    List<CouponAssignment> findByAssignmentTypeAndTargetRank(
+            CouponAssignment.AssignmentType assignmentType,
+            CustomerLevel targetRank
+    );
+
     boolean existsByCouponIdAndCustomerId(Long couponId, Long customerId);
 
     boolean existsByCustomerIdAndCouponId(Long customerId, Long couponId);
@@ -26,4 +31,6 @@ public interface CouponAssignmentRepository extends JpaRepository<CouponAssignme
             CustomerLevel targetRank,
             CouponAssignment.AssignmentType assignmentType
     );
+
+    void deleteByCouponIdAndAssignmentType(Long couponId, CouponAssignment.AssignmentType assignmentType);
 }

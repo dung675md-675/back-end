@@ -96,6 +96,39 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId).orElse(null);
     }
 
+    @Override
+    @Transactional
+    public Object cancelPendingOrder(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        if (order.getCustomer() == null || order.getCustomer().getUser() == null
+                || !order.getCustomer().getUser().getId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
+        }
+
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
+            throw new RuntimeException("Chỉ được hủy đơn ở trạng thái chờ xác nhận");
+        }
+
+        order.setStatus(Order.OrderStatus.CANCELLED);
+
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            if (product == null) {
+                continue;
+            }
+
+            product.setQuantity(product.getQuantity() + item.getQuantity());
+            if (product.getStatus() != Product.ProductStatus.DELETED) {
+                product.setStatus(Product.ProductStatus.AVAILABLE);
+            }
+            productRepository.save(product);
+        }
+
+        return orderRepository.save(order);
+    }
+
     private Coupon resolveCoupon(Long couponId, Customer customer, double subtotal) {
         if (couponId == null) {
             return null;
@@ -125,8 +158,9 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("H?ng khách hàng c?a b?n chưa đ? đ? dùng voucher này");
         }
 
-        if (coupon.getMinOrderAmount() != null && subtotal < coupon.getMinOrderAmount()) {
-            throw new RuntimeException("Đơn hàng chưa đ?t giá tr? t?i thi?u đ? áp d?ng voucher");
+        if (coupon.getMinOrderValue() != null && subtotal < coupon.getMinOrderValue()) {
+            long minOrderValue = Math.round(coupon.getMinOrderValue());
+            throw new RuntimeException("Đơn hàng tối thiểu " + minOrderValue + "đ mới được dùng voucher này");
         }
 
         return coupon;

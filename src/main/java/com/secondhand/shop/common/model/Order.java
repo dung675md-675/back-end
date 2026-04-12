@@ -112,7 +112,7 @@ public class Order {
     }
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED
+        PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED, REJECTED
     }
 }
 

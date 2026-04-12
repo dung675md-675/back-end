@@ -50,7 +50,7 @@ public class Coupon {
     private Double maxDiscountAmount = 0.0;
 
     @Column(name = "min_order_amount")
-    private Double minOrderAmount = 0.0;
+    private Double minOrderValue = 0.0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "min_rank", nullable = false)
@@ -90,9 +90,17 @@ public class Coupon {
         if (maxDiscountAmount == null) {
             maxDiscountAmount = 0.0;
         }
-        if (minOrderAmount == null) {
-            minOrderAmount = 0.0;
+        if (minOrderValue == null) {
+            minOrderValue = 0.0;
         }
+    }
+
+    public Double getMinOrderAmount() {
+        return minOrderValue;
+    }
+
+    public void setMinOrderAmount(Double minOrderAmount) {
+        this.minOrderValue = minOrderAmount;
     }
 
     public enum CouponStatus {

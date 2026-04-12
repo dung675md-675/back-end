@@ -258,6 +258,9 @@
     let appliedVoucher = null;
     let currentItems = [];
     let currentSubtotal = 0;
+    window.appliedVoucher = appliedVoucher;
+    window.currentItems = currentItems;
+    window.currentSubtotal = currentSubtotal;
 
     document.addEventListener('DOMContentLoaded', function() {
         if (!isLoggedIn()) {
@@ -284,19 +287,18 @@
 
         currentItems = items;
         currentSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        window.currentItems = currentItems;
+        window.currentSubtotal = currentSubtotal;
         renderOrderSummary(items, 0);
 
         document.getElementById('placeOrderBtn').addEventListener('click', function() {
-            handlePlaceOrder(items);
+            handlePlaceOrder(currentItems);
         });
 
         // Enter để áp dụng voucher
-        document.getElementById('voucherInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') applyVoucher();
-        });
     });
 
-    function renderOrderSummary(items, discountAmount) {
+    function renderOrderSummaryLegacy(items, discountAmount) {
         const container = document.getElementById('orderItemsSummary');
         const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const finalAmount = subtotal - discountAmount;
@@ -406,7 +408,8 @@
         }
 
         const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const discountAmount = appliedVoucher ? appliedVoucher.discountAmount : 0;
+        const activeVoucher = appliedVoucher || window.appliedVoucher;
+        const discountAmount = activeVoucher ? activeVoucher.discountAmount : 0;
         const finalAmount = Math.max(0, subtotal - discountAmount);
 
         const orderItems = items.map(item => ({
@@ -424,6 +427,7 @@
             totalAmount: subtotal,
             discountAmount: discountAmount,
             finalAmount: finalAmount,
+            couponId: activeVoucher ? activeVoucher.id : null,
             orderItems: orderItems
         };
 
@@ -448,6 +452,109 @@
             btn.disabled = false;
             btn.textContent = 'Đặt hàng';
         }
+    }
+
+    function persistCheckoutItemIds() {
+        const selectedIds = currentItems.map(item => item.productId);
+        if (selectedIds.length === 0) {
+            localStorage.removeItem('checkoutItems');
+            return;
+        }
+        localStorage.setItem('checkoutItems', JSON.stringify(selectedIds));
+    }
+
+    function removeCheckoutItem(productId) {
+        currentItems = currentItems.filter(item => item.productId !== productId);
+        window.currentItems = currentItems;
+        removeFromCart(productId);
+        persistCheckoutItemIds();
+
+        if (!currentItems.length) {
+            renderOrderSummary([], 0);
+            showNotification('Đơn hàng không còn sản phẩm nào. Quay lại giỏ hàng để chọn lại.', 'warning');
+            setTimeout(() => { window.location.href = 'cart.html'; }, 800);
+            return;
+        }
+
+        refreshCheckoutSummary();
+    }
+
+    function setCheckoutItemQuantity(productId, rawValue) {
+        const quantity = Number.parseInt(rawValue, 10);
+        const item = currentItems.find(current => current.productId === productId);
+        if (!item) {
+            return;
+        }
+
+        if (!Number.isFinite(quantity) || quantity <= 0) {
+            if (confirm('Số lượng bằng 0 sẽ xóa sản phẩm khỏi đơn. Bạn có muốn tiếp tục?')) {
+                removeCheckoutItem(productId);
+            } else {
+                refreshCheckoutSummary();
+            }
+            return;
+        }
+
+        item.quantity = quantity;
+        updateCartQuantity(productId, quantity);
+        persistCheckoutItemIds();
+        refreshCheckoutSummary();
+    }
+
+    function changeCheckoutItemQuantity(productId, quantity) {
+        setCheckoutItemQuantity(productId, quantity);
+    }
+
+    function refreshCheckoutSummary() {
+        if (typeof refreshVoucherState === 'function') {
+            refreshVoucherState();
+            return;
+        }
+        renderOrderSummary(currentItems, 0);
+    }
+
+    function renderOrderSummary(items, discountAmount) {
+        const container = document.getElementById('orderItemsSummary');
+        const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        currentSubtotal = subtotal;
+        window.currentSubtotal = currentSubtotal;
+        window.currentItems = items;
+        const finalAmount = subtotal - discountAmount;
+
+        if (!items.length) {
+            container.innerHTML = `
+                <div style="padding: 1rem; border: 1px dashed #e2e8f0; border-radius: 8px; color: #718096; text-align: center;">
+                    KhĂ´ng cĂ²n sáº£n pháº©m nĂ o trong Ä‘Æ¡n.
+                </div>
+            `;
+        } else {
+            container.innerHTML = items.map(item => `
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:0.75rem; gap: 10px;">
+                    <div style="flex:1; min-width: 0;">
+                        <div style="font-weight:500;">${item.productName}</div>
+                        <div style="display:flex; align-items:center; gap:6px; margin-top:6px;">
+                            <button type="button" style="width:28px;height:28px;border:1px solid #d1d5db;background:#fff;border-radius:6px;cursor:pointer;"
+                                    onclick="changeCheckoutItemQuantity(${item.productId}, ${item.quantity - 1})">-</button>
+                            <input type="number" min="0" value="${item.quantity}"
+                                   style="width:58px;height:28px;border:1px solid #d1d5db;border-radius:6px;text-align:center;"
+                                   onchange="setCheckoutItemQuantity(${item.productId}, this.value)">
+                            <button type="button" style="width:28px;height:28px;border:1px solid #d1d5db;background:#fff;border-radius:6px;cursor:pointer;"
+                                    onclick="changeCheckoutItemQuantity(${item.productId}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <div style="text-align:right; white-space:nowrap;">
+                        <div style="font-weight:600;">${formatCurrency(item.price * item.quantity)}</div>
+                        <div style="font-size:0.8rem; color:#718096;">${formatCurrency(item.price)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('subtotalAmount').textContent = formatCurrency(subtotal);
+        document.getElementById('discountAmount').textContent = discountAmount > 0
+            ? `-${formatCurrency(discountAmount)}`
+            : formatCurrency(0);
+        document.getElementById('finalAmount').textContent = formatCurrency(Math.max(0, finalAmount));
     }
 </script>
 <script src="js/checkout-vouchers.js"></script>

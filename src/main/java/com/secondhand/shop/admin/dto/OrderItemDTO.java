@@ -20,7 +20,7 @@ public class OrderItemDTO {
     public static OrderItemDTO fromEntity(OrderItem orderItem) {
         return OrderItemDTO.builder()
                 .id(orderItem.getId())
-                .productId(orderItem.getProduct().getId())
+                .productId(orderItem.getProduct() != null ? orderItem.getProduct().getId() : null)
                 .productName(orderItem.getProductName())
                 .price(orderItem.getPrice())
                 .quantity(orderItem.getQuantity())
