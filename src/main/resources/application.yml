@@ -2,6 +2,13 @@ app:
   jwt:
     secret: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     expiration-ms: 86400000
+  admin:
+    enabled: true
+    username: admin
+    password: admin123
+    email: admin@secondhandshop.local
+    full-name: System Administrator
+    phone: "0123456789"
 
 spring:
   datasource:
