@@ -186,11 +186,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 Object.assign(RANK_INFO, {
-    BRONZE: { label: 'Dong', icon: 'B', color: '#a0522d', bg: '#fdf0e6' },
-    SILVER: { label: 'Bac', icon: 'S', color: '#808080', bg: '#f0f0f0' },
-    GOLD: { label: 'Vang', icon: 'G', color: '#b8860b', bg: '#fffbe6' },
-    PLATINUM: { label: 'Bach kim', icon: 'P', color: '#1565c0', bg: '#e8f4fd' },
-    DIAMOND: { label: 'Kim cuong', icon: 'D', color: '#6a1b9a', bg: '#f3e5f5' },
+    BRONZE: { label: 'Đồng', icon: 'B', color: '#a0522d', bg: '#fdf0e6' },
+    SILVER: { label: 'Bạc', icon: 'S', color: '#808080', bg: '#f0f0f0' },
+    GOLD: { label: 'Vàng', icon: 'G', color: '#b8860b', bg: '#fffbe6' },
+    PLATINUM: { label: 'Bạch kim', icon: 'P', color: '#1565c0', bg: '#e8f4fd' },
+    DIAMOND: { label: 'Kim cương', icon: 'D', color: '#6a1b9a', bg: '#f3e5f5' },
     VIP_A: { label: 'VIP A', icon: 'A', color: '#00897b', bg: '#e0f2f1' },
     VIP_S: { label: 'VIP S', icon: 'S+', color: '#ef6c00', bg: '#fff3e0' },
     VIP_SS: { label: 'VIP SS', icon: 'SS', color: '#c62828', bg: '#ffebee' },
