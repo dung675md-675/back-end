@@ -162,8 +162,8 @@
       let revenueChart, categoryChart;
 
       document.addEventListener("DOMContentLoaded", async function () {
-        await loadDashboardData();
         initCharts();
+        await loadDashboardData();
       });
 
       async function loadDashboardData() {
