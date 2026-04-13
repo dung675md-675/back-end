@@ -80,29 +80,27 @@ function renderOrders(orders) {
                 <td>${order.createdAt ? formatDate(order.createdAt) : 'N/A'}</td>
                 <td class="table-actions">
                     <button class="btn btn-secondary btn-sm" onclick="viewOrderDetail(${order.id})" title="Xem chi tiết">
-                        👁️ Chi tiết
+                        Chi tiết
                     </button>
                     
                     ${order.status === 'PENDING' ? `
-                        <button class="btn btn-primary btn-sm" onclick="openApproveModal(${order.id})" title="Duyệt đơn" 
-                                style="background: var(--success-color); border-color: var(--success-color);">
-                            ✅ Duyệt
+                        <button class="btn btn-success btn-sm" onclick="openApproveModal(${order.id})" title="Duyệt đơn">
+                            Duyệt
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="openRejectModal(${order.id})" title="Từ chối">
-                            ❌ Từ chối
+                            Từ chối
                         </button>
                     ` : ''}
                     
                     ${order.status === 'CONFIRMED' ? `
                         <button class="btn btn-primary btn-sm" onclick="updateToShipping(${order.id})" title="Chuyển sang Đang giao">
-                            🚚 Đang giao
+                            Đang giao
                         </button>
                     ` : ''}
                     
                     ${order.status === 'SHIPPING' ? `
-                        <button class="btn btn-primary btn-sm" onclick="updateToDelivered(${order.id})" title="Đã giao hàng" 
-                                style="background: var(--success-color); border-color: var(--success-color);">
-                            ✅ Đã giao
+                        <button class="btn btn-success btn-sm" onclick="updateToDelivered(${order.id})" title="Đã giao hàng">
+                            Đã giao
                         </button>
                     ` : ''}
                 </td>
@@ -147,95 +145,110 @@ async function viewOrderDetail(id) {
         const order = await fetchGet(`${API_ENDPOINTS.ORDERS}/${id}`);
 
         const createdAtText = order.createdAt ? formatDate(order.createdAt) : 'N/A';
-        const voucherInfo = order.couponCode
-            ? `${order.couponCode}${order.couponName ? ` - ${order.couponName}` : ''}`
-            : 'KhĂ´ng Ă¡p dá»¥ng';
-
         const safeVoucherInfo = order.couponCode
-            ? `${order.couponCode}${order.couponName ? ` - ${order.couponName}` : ''}`
-            : 'Khong ap dung';
+            ? `<span class="badge badge-info">${order.couponCode}</span>${order.couponName ? ` - ${order.couponName}` : ''}`
+            : '<span class="text-muted">Không áp dụng</span>';
 
         const content = document.getElementById('orderDetailContent');
         content.innerHTML = `
-            <div class="grid grid-2" style="gap: 1rem; margin-bottom: 1.5rem;">
-                <div class="form-group">
-                    <strong>Mã đơn hàng:</strong>
-                    <p>${order.orderCode}</p>
+            <div class="order-detail-wrapper">
+                <!-- Header Info -->
+                <div class="order-section">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Mã đơn hàng</span>
+                            <span class="info-value" style="color: var(--vp-c-brand); font-size: 1.1rem;">#${order.orderCode}</span>
+                        </div>
+                        <div class="info-item" style="align-items: flex-end;">
+                            <span class="info-label">Trạng thái</span>
+                            <span class="badge badge-${getOrderStatusBadgeClass(order.status)}" style="padding: 0.5rem 1rem;">
+                                ${getOrderStatusText(order.status)}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <strong>Trạng thái:</strong>
-                    <p><span class="badge badge-${getOrderStatusBadgeClass(order.status)}">
-                        ${getOrderStatusText(order.status)}
-                    </span></p>
+
+                <!-- Customer & Shipping -->
+                <div class="order-section">
+                    <h3 class="order-section-title"><i class='bx bx-user'></i> Thông tin khách hàng</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Họ và tên</span>
+                            <span class="info-value">${order.customerName}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Số điện thoại</span>
+                            <span class="info-value">${order.shippingPhone}</span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2; margin-top: 0.5rem;">
+                            <span class="info-label">Địa chỉ giao hàng</span>
+                            <span class="info-value"><i class='bx bx-map-pin' style="color: var(--danger);"></i> ${order.shippingAddress}</span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2; margin-top: 0.5rem;">
+                            <span class="info-label">Ngày đặt hàng</span>
+                            <span class="info-value">${createdAtText}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <strong>Khách hàng:</strong>
-                <p>${order.customerName}</p>
-            </div>
-            
-            <div class="grid grid-2" style="gap: 1rem;">
-                <div class="form-group">
-                    <strong>Số điện thoại:</strong>
-                    <p>${order.shippingPhone}</p>
+
+                <!-- Note -->
+                ${order.note ? `
+                <div class="order-section">
+                    <h3 class="order-section-title"><i class='bx bx-note'></i> Ghi chú</h3>
+                    <div class="order-summary-box" style="margin-top: 0; background: #fffbeb; border: 1px solid #fef3c7;">
+                        <p style="font-size: 0.9rem; color: #92400e;">${order.note}</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <strong>Ngày đặt:</strong>
-                    <p>${createdAtText}</p>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <strong>Địa chỉ giao hàng:</strong>
-                <p>${order.shippingAddress}</p>
-            </div>
-            
-            <div class="form-group">
-                <strong>Ghi chú:</strong>
-                <p>${order.note || '-'}</p>
-            </div>
-            
-            <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Chi tiết sản phẩm:</h3>
-            ${order.orderItems && order.orderItems.length > 0 ? `
-                <table style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Giá</th>
-                            <th>Số lượng</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${order.orderItems.map(item => `
-                            <tr>
-                                <td>${item.productName}</td>
-                                <td>${formatCurrency(item.price)}</td>
-                                <td>${item.quantity}</td>
-                                <td><strong>${formatCurrency(item.subtotal)}</strong></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            ` : '<p>Không có sản phẩm</p>'}
-            
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>Tổng tiền:</strong>
-                    <span>${formatCurrency(order.totalAmount)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>Giảm giá:</strong>
-                    <span>-${formatCurrency(order.discountAmount)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>Voucher:</strong>
-                    <span>${safeVoucherInfo}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
-                    <strong>Thành tiền:</strong>
-                    <strong style="color: var(--danger-color);">${formatCurrency(order.finalAmount)}</strong>
+                ` : ''}
+
+                <!-- Product List -->
+                <div class="order-section">
+                    <h3 class="order-section-title"><i class='bx bx-package'></i> Danh sách sản phẩm</h3>
+                    <div class="table-container shadow-none" style="border: 1px solid var(--border-color);">
+                        <table class="order-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th style="text-align: right;">Đơn giá</th>
+                                    <th style="text-align: center;">SL</th>
+                                    <th style="text-align: right;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.orderItems.map(item => `
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 600;">${item.productName}</div>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);">Mã SP: #${item.productId}</div>
+                                        </td>
+                                        <td style="text-align: right;">${formatCurrency(item.price)}</td>
+                                        <td style="text-align: center;">${item.quantity}</td>
+                                        <td style="text-align: right; font-weight: 600;">${formatCurrency(item.subtotal)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Summary -->
+                    <div class="order-summary-box">
+                        <div class="summary-row">
+                            <span>Tạm tính</span>
+                            <span>${formatCurrency(order.totalAmount)}</span>
+                        </div>
+                        <div class="summary-row" style="color: var(--danger);">
+                            <span>Giảm giá</span>
+                            <span>-${formatCurrency(order.discountAmount)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Voucher applied</span>
+                            <span>${safeVoucherInfo}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Tổng thanh toán</span>
+                            <span>${formatCurrency(order.finalAmount)}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;

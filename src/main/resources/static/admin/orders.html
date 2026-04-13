@@ -3,61 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý đơn hàng - Secondhand Shop</title>
+    <title>Quản lý đơn hàng - Secondhand Shop Admin</title>
+    <!-- Thêm icon (optional, để trang trí menu) -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/orders.css">
-    <link rel="stylesheet" href="./css/responsive.css">
 </head>
 <body>
-    <!-- HEADER -->
-    <header>
-        <div class="header-container">
-            <div class="logo">
-                <h1>🛍️ Secondhand Shop</h1>
-                <p>Hệ thống quản lý bán hàng 2hand</p>
+    <div class="admin-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <h1><i class='bx bxs-shopping-bag'></i> 2hand Admin</h1>
+                </div>
             </div>
-            <nav>
+            <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="index.html">Trang chủ</a></li>
-                    <li><a href="categories.html">Danh mục</a></li>
-                    <li><a href="products.html">Sản phẩm</a></li>
-                    <li><a href="orders.html" class="active">Đơn hàng</a></li>
-                    <li><a href="customers.html">Khách hàng</a></li>
-                    <li><a href="#" onclick="logoutAdmin()" style="color:#ff4d4d">Đăng xuất</a></li>
+                    <li><a href="index.html"><i class='bx bx-home-alt nav-icon'></i> Tổng quan</a></li>
+                    <li><a href="categories.html"><i class='bx bx-category nav-icon'></i> Danh mục</a></li>
+                    <li><a href="products.html"><i class='bx bx-package nav-icon'></i> Sản phẩm</a></li>
+                    <li><a href="orders.html" class="active"><i class='bx bx-cart nav-icon'></i> Đơn hàng</a></li>
+                    <li><a href="customers.html"><i class='bx bx-user nav-icon'></i> Khách hàng</a></li>
                 </ul>
             </nav>
-        </div>
-    </header>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logoutAdmin()" class="logout-btn">
+                    <i class='bx bx-log-out'></i> Đăng xuất
+                </a>
+            </div>
+        </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="container">
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="page-title">Quản lý đơn hàng</h1>
+            </div>
         <div class="card">
             <div class="card-header">
-                <h1 class="card-title">Quản lý đơn hàng</h1>
+                <h2 class="card-title">Danh sách đơn hàng</h2>
                 <!-- ❌ BỎ NÚT TẠO ĐƠN HÀNG -->
             </div>
 
             <!-- STATISTICS -->
-            <div class="stats-container" style="margin-bottom: 1.5rem;">
-                <div class="stat-card" style="border-left-color: var(--warning-color);">
-                    <h3>Chờ duyệt</h3>
-                    <div class="stat-value" id="pendingOrders">0</div>
+            <div class="stats-container" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class='bx bx-time'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Chờ duyệt</h3>
+                        <div class="stat-value" id="pendingOrders">0</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="border-left-color: var(--secondary-color);">
-                    <h3>Đang giao</h3>
-                    <div class="stat-value" id="shippingOrders">0</div>
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class='bx bx-bus'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Đang giao</h3>
+                        <div class="stat-value" id="shippingOrders">0</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="border-left-color: var(--success-color);">
-                    <h3>Đã giao</h3>
-                    <div class="stat-value" id="deliveredOrders">0</div>
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class='bx bx-check-double'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Đã giao</h3>
+                        <div class="stat-value" id="deliveredOrders">0</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="border-left-color: #7f8c8d;">
-                    <h3>Đã hủy</h3>
-                    <div class="stat-value" id="cancelledOrders">0</div>
+                <div class="stat-card">
+                    <div class="stat-icon secondary">
+                        <i class='bx bx-x-circle'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Đã hủy</h3>
+                        <div class="stat-value" id="cancelledOrders">0</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="border-left-color: #b71c1c;">
-                    <h3>Từ chối (Shop)</h3>
-                    <div class="stat-value" id="rejectedOrders">0</div>
+                <div class="stat-card">
+                    <div class="stat-icon danger" style="background: #fef2f2; color: #dc2626;">
+                        <i class='bx bx-block'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Từ chối</h3>
+                        <div class="stat-value" id="rejectedOrders">0</div>
+                    </div>
                 </div>
             </div>
 
@@ -110,7 +143,8 @@
                 </table>
             </div>
         </div>
-    </main>
+        </main>
+    </div>
 
     <!-- ========================================
          MODAL XEM CHI TIẾT ĐƠN HÀNG
@@ -121,7 +155,7 @@
                 <h2 class="modal-title">Chi tiết đơn hàng</h2>
                 <button class="close-btn" onclick="closeOrderDetailModal()">&times;</button>
             </div>
-            <div id="orderDetailContent">
+            <div id="orderDetailContent" class="modal-body">
                 <!-- Content will be loaded here -->
             </div>
         </div>
@@ -133,16 +167,16 @@
     <div id="approveOrderModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h2 class="modal-title">✅ Duyệt đơn hàng</h2>
+                <h2 class="modal-title">Duyệt đơn hàng</h2>
                 <button class="close-btn" onclick="closeApproveOrderModal()">&times;</button>
             </div>
-            <div id="approveOrderContent">
+            <div id="approveOrderContent" class="modal-body">
                 <p>Bạn có chắc chắn muốn <strong style="color: var(--success-color);">DUYỆT</strong> đơn hàng này?</p>
                 <p>Đơn hàng sẽ chuyển sang trạng thái <strong>"Đã xác nhận"</strong></p>
                 
                 <div class="form-group" style="margin-top: 1.5rem;">
                     <button class="btn btn-success" onclick="confirmApproveOrder()" style="width: 100%; background: var(--success-color);">
-                        ✅ Xác nhận duyệt
+                        Xác nhận duyệt
                     </button>
                     <button class="btn btn-secondary" onclick="closeApproveOrderModal()" style="width: 100%; margin-top: 0.5rem;">
                         Hủy
@@ -158,10 +192,10 @@
     <div id="rejectOrderModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h2 class="modal-title">❌ Từ chối đơn hàng</h2>
+                <h2 class="modal-title">Từ chối đơn hàng</h2>
                 <button class="close-btn" onclick="closeRejectOrderModal()">&times;</button>
             </div>
-            <form id="rejectOrderForm" onsubmit="confirmRejectOrder(event)">
+            <form id="rejectOrderForm" class="modal-body" onsubmit="confirmRejectOrder(event)">
                 <p>Bạn có chắc chắn muốn <strong style="color: var(--danger-color);">TỪ CHỐI</strong> đơn hàng này?</p>
                 
                 <div class="form-group">
@@ -174,7 +208,7 @@
                 
                 <div class="form-group">
                     <button type="submit" class="btn btn-danger" style="width: 100%;">
-                        ❌ Xác nhận từ chối
+                        Xác nhận từ chối
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="closeRejectOrderModal()" style="width: 100%; margin-top: 0.5rem;">
                         Hủy

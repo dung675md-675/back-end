@@ -61,19 +61,32 @@ public class OrderServiceImpl implements OrderService {
         double subtotal = 0.0;
         for (OrderRequestDTO.OrderItemRequestDTO itemDTO : request.getOrderItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Khong tim thay san pham id: " + itemDTO.getProductId()));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + itemDTO.getProductId()));
+
+            // ✅ KIỂM TRA TỒN KHO
+            if (product.getQuantity() < itemDTO.getQuantity()) {
+                throw new RuntimeException("Sản phẩm '" + product.getName() + "' chỉ còn " + product.getQuantity() + " sản phẩm có sẵn. Vui lòng giảm số lượng.");
+            }
 
             double itemSubtotal = product.getPrice() * itemDTO.getQuantity();
             subtotal += itemSubtotal;
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(product);
-            orderItem.setProductName(product.getName());
-            orderItem.setPrice(product.getPrice());
-            orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setSubtotal(itemSubtotal);
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .product(product)
+                    .productName(product.getName())
+                    .price(product.getPrice())
+                    .quantity(itemDTO.getQuantity())
+                    .subtotal(itemSubtotal)
+                    .build();
             orderItems.add(orderItem);
+
+            // ✅ TRỪ KHO
+            product.setQuantity(product.getQuantity() - itemDTO.getQuantity());
+            if (product.getQuantity() <= 0 && product.getStatus() != Product.ProductStatus.DELETED) {
+                product.setStatus(Product.ProductStatus.SOLD);
+            }
+            productRepository.save(product);
         }
 
         Coupon coupon = resolveCoupon(request.getCouponId(), customer, subtotal);

@@ -3,132 +3,170 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trang chủ - Secondhand Shop</title>
+    <title>Dashboard - Secondhand Shop Admin</title>
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" href="./css/style.css" />
-    <link rel="stylesheet" href="./css/style.css" />
-    <link rel="stylesheet" href="./css/responsive.css" />
   </head>
   <body>
-    <!-- HEADER -->
-    <header>
-      <div class="header-container">
-        <div class="logo">
-          <h1>🛍️ Secondhand Shop</h1>
-          <p>Hệ thống quản lý bán hàng 2hand</p>
-        </div>
-        <nav>
-          <ul>
-            <li><a href="index.html" class="active">Trang chủ</a></li>
-            <li><a href="categories.html">Danh mục</a></li>
-            <li><a href="products.html">Sản phẩm</a></li>
-            <li><a href="orders.html">Đơn hàng</a></li>
-            <li><a href="customers.html">Khách hàng</a></li>
-            <li>
-              <a href="#" onclick="logoutAdmin()" style="color: #ff4d4d">
-                Đăng xuất
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="container">
-      <h1 class="page-title">Dashboard - Tổng quan</h1>
-
-      <!-- STATISTICS -->
-      <div class="stats-container">
-        <div class="stat-card">
-          <h3>Tổng sản phẩm</h3>
-          <div class="stat-value" id="totalProducts">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Sản phẩm có sẵn</h3>
-          <div class="stat-value" id="availableProducts">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Tổng đơn hàng</h3>
-          <div class="stat-value" id="totalOrders">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Khách hàng</h3>
-          <div class="stat-value" id="totalCustomers">0</div>
-        </div>
-      </div>
-
-      <!-- LATEST PRODUCTS -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Sản phẩm mới nhất</h2>
-          <a href="products.html" class="btn btn-primary btn-sm">Xem tất cả</a>
-        </div>
-        <div id="latestProducts" class="grid grid-4">
-          <div class="loading">
-            <div class="spinner"></div>
-            <p>Đang tải...</p>
+    <div class="admin-wrapper">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <h1><i class='bx bxs-shopping-bag'></i> 2hand Admin</h1>
           </div>
         </div>
-      </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li><a href="index.html" class="active"><i class='bx bx-home-alt nav-icon'></i> Tổng quan</a></li>
+            <li><a href="categories.html"><i class='bx bx-category nav-icon'></i> Danh mục</a></li>
+            <li><a href="products.html"><i class='bx bx-package nav-icon'></i> Sản phẩm</a></li>
+            <li><a href="orders.html"><i class='bx bx-cart nav-icon'></i> Đơn hàng</a></li>
+            <li><a href="customers.html"><i class='bx bx-user nav-icon'></i> Khách hàng</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="#" onclick="logoutAdmin()" class="logout-btn">
+            <i class='bx bx-log-out'></i> Đăng xuất
+          </a>
+        </div>
+      </aside>
 
-      <!-- RECENT ORDERS -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Đơn hàng gần đây</h2>
-          <a href="orders.html" class="btn btn-secondary btn-sm">Xem tất cả</a>
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="content-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.25rem;">Chào mừng quay trở lại, đây là hệ thống thống kê của bạn.</p>
+          </div>
+          <div class="actions">
+             <button class="btn btn-primary" onclick="window.location.reload()">
+                <i class='bx bx-refresh'></i> Làm mới
+             </button>
+          </div>
         </div>
-        <div class="table-container">
-          <table id="recentOrdersTable">
-            <thead>
-              <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-              </tr>
-            </thead>
-            <tbody id="recentOrdersBody">
-              <tr>
-                <td colspan="5" class="loading">
-                  <div class="spinner"></div>
-                  <p>Đang tải...</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <!-- STATISTICS GRID -->
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-icon primary">
+              <i class='bx bx-package'></i>
+            </div>
+            <div class="stat-content">
+              <h3>Tổng sản phẩm</h3>
+              <div class="stat-value" id="totalProducts">0</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon success">
+              <i class='bx bx-check-circle'></i>
+            </div>
+            <div class="stat-content">
+              <h3>Sản phẩm có sẵn</h3>
+              <div class="stat-value" id="availableProducts">0</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon warning">
+              <i class='bx bx-cart-alt'></i>
+            </div>
+            <div class="stat-content">
+              <h3>Tổng đơn hàng</h3>
+              <div class="stat-value" id="totalOrders">0</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon info">
+              <i class='bx bx-user'></i>
+            </div>
+            <div class="stat-content">
+              <h3>Khách hàng</h3>
+              <div class="stat-value" id="totalCustomers">0</div>
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+
+        <!-- CHARTS SECTION -->
+        <div class="dashboard-grid">
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h2 class="card-title">Tổng quan doanh thu</h2>
+                    <div class="badge badge-success">Theo tháng</div>
+                </div>
+                <div id="revenueChart"></div>
+            </div>
+            
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h2 class="card-title">Phân bổ sản phẩm</h2>
+                </div>
+                <div id="categoryChart"></div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+            <!-- LATEST PRODUCTS -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Sản phẩm mới</h2>
+                    <a href="products.html" class="btn btn-secondary btn-sm">Tất cả</a>
+                </div>
+                <div id="latestProducts" class="grid grid-2">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Đang tải...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT ORDERS -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Đơn hàng gần đây</h2>
+                    <a href="orders.html" class="btn btn-secondary btn-sm">Tất cả</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersBody">
+                            <tr>
+                                <td colspan="3" class="loading">
+                                    <div class="spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+      </main>
+    </div>
 
     <!-- SCRIPTS -->
     <script src="./js/config.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/auth.js"></script>
     <script>
-      // ===================================
-      // DASHBOARD LOGIC
-      // ===================================
+      let revenueChart, categoryChart;
 
       document.addEventListener("DOMContentLoaded", async function () {
         await loadDashboardData();
+        initCharts();
       });
 
       async function loadDashboardData() {
-        try {
-          // Load statistics
-          await Promise.all([
-            loadStatistics(),
-            loadLatestProducts(),
-            loadRecentOrders(),
-          ]);
-        } catch (error) {
-          console.error("Error loading dashboard:", error);
-        }
-      }
-
-      // Load statistics
-      async function loadStatistics() {
         try {
           const [products, orders, customers] = await Promise.all([
             fetchGet(API_ENDPOINTS.PRODUCTS),
@@ -136,133 +174,166 @@
             fetchGet(API_ENDPOINTS.CUSTOMERS),
           ]);
 
-          document.getElementById("totalProducts").textContent =
-            products.length;
-          document.getElementById("availableProducts").textContent =
-            products.filter((p) => p.status === "AVAILABLE").length;
+          document.getElementById("totalProducts").textContent = products.length;
+          document.getElementById("availableProducts").textContent = products.filter((p) => p.status === "AVAILABLE").length;
           document.getElementById("totalOrders").textContent = orders.length;
-          document.getElementById("totalCustomers").textContent =
-            customers.length;
+          document.getElementById("totalCustomers").textContent = customers.length;
+
+          renderLatestProducts(products);
+          renderRecentOrders(orders);
+          updateCharts(products, orders);
         } catch (error) {
-          console.error("Error loading statistics:", error);
+          console.error("Error loading dashboard:", error);
         }
       }
 
-      // Load latest products
-      async function loadLatestProducts() {
-        try {
-          const products = await fetchGet(API_ENDPOINTS.PRODUCTS_LATEST);
-          const container = document.getElementById("latestProducts");
-
-          if (products.length === 0) {
-            container.innerHTML = "<p>Chưa có sản phẩm nào</p>";
-            return;
-          }
-
-          container.innerHTML = products
-            .slice(0, 4)
-            .map(
-              (product) => `
-                    <div class="product-card">
-                        <img src="${product.imageUrl || "images/placeholder.png"}" 
-                             alt="${product.name}" 
-                             class="product-image">
-                        <div class="product-info">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-price">${formatCurrency(product.price)}</div>
-                            ${
-                              product.originalPrice
-                                ? `<div class="product-original-price">${formatCurrency(product.originalPrice)}</div>`
-                                : ""
-                            }
-                            <span class="badge badge-${getStatusBadgeClass(product.status)}">
-                                ${getStatusText(product.status)}
-                            </span>
-                        </div>
-                    </div>
-                `,
-            )
-            .join("");
-        } catch (error) {
-          document.getElementById("latestProducts").innerHTML =
-            '<p class="error">Lỗi khi tải sản phẩm</p>';
-        }
-      }
-
-      // Load recent orders
-      async function loadRecentOrders() {
-        try {
-          const orders = await fetchGet(API_ENDPOINTS.ORDERS);
-          const tbody = document.getElementById("recentOrdersBody");
-
-          if (orders.length === 0) {
-            tbody.innerHTML =
-              '<tr><td colspan="5">Chưa có đơn hàng nào</td></tr>';
-            return;
-          }
-
-          tbody.innerHTML = orders
-            .slice(0, 5)
-            .map(
-              (order) => `
-                    <tr>
-                        <td><strong>${order.orderCode}</strong></td>
-                        <td>${order.customerName}</td>
-                        <td><strong>${formatCurrency(order.finalAmount)}</strong></td>
-                        <td><span class="badge badge-${getOrderStatusBadgeClass(order.status)}">
-                            ${getOrderStatusText(order.status)}
-                        </span></td>
-                        <td>${formatDate(order.createdAt)}</td>
-                    </tr>
-                `,
-            )
-            .join("");
-        } catch (error) {
-          document.getElementById("recentOrdersBody").innerHTML =
-            '<tr><td colspan="5">Lỗi khi tải đơn hàng</td></tr>';
-        }
-      }
-
-      // Helper functions
-      function getStatusBadgeClass(status) {
-        const classes = {
-          AVAILABLE: "success",
-          SOLD: "secondary",
-          RESERVED: "warning",
-          DELETED: "danger",
+      function initCharts() {
+        // Revenue Chart (Simulated Data for visual impact)
+        const revenueOptions = {
+          series: [{
+            name: 'Doanh thu',
+            data: [3100000, 4000000, 2800000, 5100000, 4200000, 10900000, 10000000]
+          }],
+          chart: {
+            height: 350,
+            type: 'area',
+            toolbar: { show: false },
+            fontFamily: 'Inter, sans-serif',
+            sparkline: { enabled: false }
+          },
+          colors: ['#6366f1'],
+          dataLabels: { enabled: false },
+          stroke: { curve: 'smooth', width: 3 },
+          fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.45,
+                opacityTo: 0.05,
+                stops: [20, 100, 100, 100]
+            }
+          },
+          xaxis: {
+            categories: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+          },
+          yaxis: { show: false },
+          grid: { borderColor: '#f1f5f9' },
+          tooltip: { 
+              y: { formatter: (val) => formatCurrency(val) }
+          },
         };
+        revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
+        revenueChart.render();
+
+        // Category Chart
+        const categoryOptions = {
+          series: [1],
+          chart: {
+            type: 'donut',
+            height: 350,
+            fontFamily: 'Inter, sans-serif'
+          },
+          labels: ['Đang tải...'],
+          colors: ['#6366f1', '#10b981', '#f59e0b', '#3b82f6', '#ef4444'],
+          legend: { position: 'bottom', fontSize: '14px' },
+          stroke: { width: 0 },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: '75%',
+                labels: {
+                  show: true,
+                  name: { show: true, fontSize: '16px', fontWeight: 600 },
+                  value: { show: true, fontSize: '20px', fontWeight: 700, formatter: val => val },
+                  total: { show: true, label: 'Tổng số', fontSize: '14px', color: '#64748b' }
+                }
+              }
+            }
+          }
+        };
+        categoryChart = new ApexCharts(document.querySelector("#categoryChart"), categoryOptions);
+        categoryChart.render();
+      }
+
+      async function updateCharts(products, orders) {
+          const categoryCounts = {};
+          products.forEach(p => {
+              categoryCounts[p.categoryName] = (categoryCounts[p.categoryName] || 0) + 1;
+          });
+          
+          const labels = Object.keys(categoryCounts).slice(0, 5);
+          const series = labels.map(l => categoryCounts[l]);
+          
+          if (labels.length > 0) {
+              categoryChart.updateOptions({
+                  series: series,
+                  labels: labels
+              });
+          }
+      }
+
+      function renderLatestProducts(products) {
+        const container = document.getElementById("latestProducts");
+        const latest = products.sort((a,b) => b.id - a.id).slice(0, 4);
+
+        if (latest.length === 0) {
+          container.innerHTML = "<p>Chưa có sản phẩm nào</p>";
+          return;
+        }
+
+        container.innerHTML = latest.map(product => `
+            <div class="product-card">
+                <img src="${product.imageUrl || "images/placeholder.png"}" alt="${product.name}" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">${formatCurrency(product.price)}</div>
+                    <span class="badge badge-${getStatusBadgeClass(product.status)}" style="margin-top: 0.75rem;">
+                        ${getStatusText(product.status)}
+                    </span>
+                </div>
+            </div>
+        `).join("");
+      }
+
+      function renderRecentOrders(orders) {
+        const tbody = document.getElementById("recentOrdersBody");
+        const recent = orders.slice(0, 5);
+
+        if (recent.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: var(--text-muted);">Chưa có đơn hàng nào</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = recent.map(order => `
+            <tr>
+                <td><strong>#${order.orderCode}</strong></td>
+                <td><strong style="color: var(--vp-c-brand);">${formatCurrency(order.finalAmount)}</strong></td>
+                <td><span class="badge badge-${getOrderStatusBadgeClass(order.status)}">
+                    ${getOrderStatusText(order.status)}
+                </span></td>
+            </tr>
+        `).join("");
+      }
+
+      function getStatusBadgeClass(status) {
+        const classes = { AVAILABLE: "success", SOLD: "secondary", RESERVED: "warning", DELETED: "danger" };
         return classes[status] || "secondary";
       }
 
       function getStatusText(status) {
-        const texts = {
-          AVAILABLE: "Còn hàng",
-          SOLD: "Đã bán",
-          RESERVED: "Đã đặt",
-          DELETED: "Đã xóa",
-        };
+        const texts = { AVAILABLE: "Còn hàng", SOLD: "Đã bán", RESERVED: "Đã đặt", DELETED: "Đã xóa" };
         return texts[status] || status;
       }
 
       function getOrderStatusBadgeClass(status) {
-        const classes = {
-          PENDING: "warning",
-          CONFIRMED: "info",
-          SHIPPING: "info",
-          DELIVERED: "success",
-          CANCELLED: "danger",
-        };
+        const classes = { PENDING: "warning", CONFIRMED: "info", SHIPPING: "info", DELIVERED: "success", CANCELLED: "danger" };
         return classes[status] || "secondary";
       }
 
       function getOrderStatusText(status) {
-        const texts = {
-          PENDING: "Chờ xử lý",
-          CONFIRMED: "Đã xác nhận",
-          SHIPPING: "Đang giao",
-          DELIVERED: "Đã giao",
-          CANCELLED: "Đã hủy",
-        };
+        const texts = { PENDING: "Chờ duyệt", CONFIRMED: "Đã xác nhận", SHIPPING: "Đang giao", DELIVERED: "Đã giao", CANCELLED: "Đã hủy" };
         return texts[status] || status;
       }
     </script>

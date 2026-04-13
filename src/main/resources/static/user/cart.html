@@ -84,9 +84,9 @@
                 </div>
                 <h3 style="margin-top: 1.5rem;">ĐƠN VỊ VẬN CHUYỂN</h3>
                 <div class="shipping-methods">
-                    <img src="https://spx.vn/mms/statics/pc/images/spx-logo.png" alt="SPX">
-                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/05/Logo-GHN-Orange.png" alt="GHN">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Viettel_Post_logo.svg/200px-Viettel_Post_logo.svg.png" alt="Viettel Post">
+                    <img src="../images/shipping/spx.png" alt="SPX">
+                    <img src="../images/shipping/ghn.png" alt="GHN">
+                    <img src="../images/shipping/viettel.png" alt="Viettel Post">
                 </div>
             </div>
             <div class="footer-col">
@@ -115,7 +115,7 @@
             updateCartBadge();
         });
 
-        function loadCartItems() {
+        async function loadCartItems() {
             const cart = getCart();
             const contentDiv = document.getElementById('cartContent');
 
@@ -131,6 +131,41 @@
                 return;
             }
 
+            // Show loading state
+            contentDiv.innerHTML = '<div style="text-align:center; padding: 3rem;"><div class="spinner"></div><p>Đang kiểm tra tồn kho...</p></div>';
+
+            const updatedCart = [];
+            let hasAdjustments = false;
+
+            // Fetch latest stock for each item
+            for (let item of cart) {
+                try {
+                    const product = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/${item.productId}`);
+                    if (!product || product.status !== 'AVAILABLE' || product.quantity <= 0) {
+                        // Keep item but set quantity to 0 or we could recommend removal
+                        item.maxStock = 0;
+                        item.quantity = 0;
+                        hasAdjustments = true;
+                    } else if (item.quantity > product.quantity) {
+                        item.quantity = product.quantity;
+                        item.maxStock = product.quantity;
+                        hasAdjustments = true;
+                    } else {
+                        item.maxStock = product.quantity;
+                    }
+                    updatedCart.push(item);
+                } catch (error) {
+                    console.error('Error checking stock for item:', item.productId, error);
+                    item.maxStock = 0; // Assume 0 if error fetching
+                    updatedCart.push(item);
+                }
+            }
+
+            if (hasAdjustments) {
+                saveCart(updatedCart);
+                showNotification('Một số sản phẩm trong giỏ đã được cập nhật số lượng theo tồn kho thực tế.', 'warning');
+            }
+
             // Header row
             const headerRow = `
                 <div class="cart-header-row">
@@ -144,12 +179,15 @@
             `;
 
             // Items
-            const itemsHtml = cart.map((item, index) => `
-                <div class="cart-item-card" id="card-${item.productId}">
+            const itemsHtml = updatedCart.map((item, index) => {
+                const isOutOfStock = (item.maxStock || 0) <= 0;
+                return `
+                <div class="cart-item-card ${isOutOfStock ? 'out-of-stock' : ''}" id="card-${item.productId}">
                     <div class="cart-item-row">
                         <div class="cart-checkbox-wrapper">
                             <input type="checkbox"
                                    class="cart-checkbox item-checkbox"
+                                   ${isOutOfStock ? 'disabled' : ''}
                                    data-id="${item.productId}"
                                    onchange="onItemCheck(this, ${item.productId})">
                         </div>
@@ -158,18 +196,25 @@
                                  onerror="this.src='../images/placeholder.png'"
                                  alt="${(item.productName || '').replace(/"/g, '&quot;')}"
                                  class="cart-product-img">
-                            <span class="cart-product-name">${item.productName}</span>
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span class="cart-product-name">${item.productName}</span>
+                                ${isOutOfStock ? 
+                                    '<span style="color:var(--danger-color); font-size:0.8rem; font-weight:bold;">Hết hàng</span>' : 
+                                    `<span style="color:var(--text-gray); font-size:0.8rem;">Tồn kho: ${item.maxStock}</span>`
+                                }
+                            </div>
                         </div>
                         <div class="cart-unit-price">${formatCurrency(item.price)}</div>
                         <div style="display:flex;justify-content:center;">
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeQty(${item.productId}, ${item.quantity - 1})">−</button>
+                                <button class="qty-btn" ${isOutOfStock ? 'disabled' : ''} onclick="changeQty(${item.productId}, ${item.quantity - 1}, ${item.maxStock})">−</button>
                                 <input type="number"
                                        class="qty-input"
                                        value="${item.quantity}"
                                        min="1"
-                                       onchange="changeQty(${item.productId}, parseInt(this.value) || 1)">
-                                <button class="qty-btn" onclick="changeQty(${item.productId}, ${item.quantity + 1})">+</button>
+                                       ${isOutOfStock ? 'disabled' : ''}
+                                       onchange="changeQty(${item.productId}, parseInt(this.value) || 1, ${item.maxStock})">
+                                <button class="qty-btn" ${isOutOfStock || item.quantity >= item.maxStock ? 'disabled' : ''} onclick="changeQty(${item.productId}, ${item.quantity + 1}, ${item.maxStock})">+</button>
                             </div>
                         </div>
                         <div class="cart-subtotal" id="subtotal-${item.productId}">
@@ -182,7 +227,7 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
 
             // Bottom sticky bar
             const bottomBar = `
@@ -190,7 +235,7 @@
                     <div class="bottom-bar-left">
                         <label class="select-all-label">
                             <input type="checkbox" class="cart-checkbox" id="selectAll" onchange="toggleSelectAll(this)">
-                            Chọn Tất Cả (${cart.length})
+                            Chọn Tất Cả (${updatedCart.length})
                         </label>
                         <span class="selected-count" id="selectedCount">Đã chọn 0 sản phẩm</span>
                     </div>
@@ -260,10 +305,14 @@
             if (checkoutBtn) checkoutBtn.disabled = checkedIds.length === 0;
         }
 
-        function changeQty(productId, newQty) {
+        function changeQty(productId, newQty, maxStock) {
             if (newQty < 1) {
                 removeItem(productId, '');
                 return;
+            }
+            if (newQty > maxStock) {
+                showNotification(`Chỉ còn ${maxStock} sản phẩm có sẵn.`, 'warning');
+                newQty = maxStock;
             }
             updateCartQuantity(productId, newQty);
         }
@@ -276,7 +325,7 @@
             }
         }
 
-        function proceedToCheckout() {
+        async function proceedToCheckout() {
             const checkedIds = [...document.querySelectorAll('.item-checkbox:checked')].map(cb => parseInt(cb.dataset.id));
             if (checkedIds.length === 0) {
                 showNotification('Vui lòng chọn ít nhất 1 sản phẩm!', 'warning');
@@ -287,6 +336,39 @@
                 showNotification('Vui lòng đăng nhập để tiếp tục!', 'warning');
                 setTimeout(() => { window.location.href = '../login.html'; }, 1500);
                 return;
+            }
+
+            // Final Stock Validation before redirect
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const originalText = checkoutBtn.textContent;
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Đang kiểm tra kho...';
+
+            const cart = getCart();
+
+            for (const id of checkedIds) {
+                try {
+                    const product = await fetchGet(`${API_ENDPOINTS.PRODUCTS}/${id}`);
+                    const cartItem = cart.find(i => i.productId === id);
+                    if (!product || product.status !== 'AVAILABLE') {
+                        showNotification(`Sản phẩm "${cartItem.productName}" đã ngừng kinh doanh.`, 'error');
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.textContent = originalText;
+                        return;
+                    }
+                    if (cartItem.quantity > product.quantity) {
+                        showNotification(`Sản phẩm "${cartItem.productName}" chỉ còn ${product.quantity} món. Vui lòng cập nhật lại giỏ hàng.`, 'error');
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.textContent = originalText;
+                        loadCartItems(); // Reload to show new limits
+                        return;
+                    }
+                } catch (e) {
+                    showNotification('Lỗi khi kiểm tra tồn kho.', 'error');
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = originalText;
+                    return;
+                }
             }
 
             // Lưu danh sách sản phẩm được chọn vào localStorage để checkout dùng

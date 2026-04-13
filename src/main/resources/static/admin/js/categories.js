@@ -46,10 +46,10 @@ function renderCategories(categories) {
             </td>
             <td class="table-actions">
                 <button class="btn btn-secondary btn-sm" onclick="editCategory(${category.id})">
-                    ✏️ Sửa
+                    Sửa
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id})">
-                    🗑️ Xóa
+                    Xóa
                 </button>
             </td>
         </tr>

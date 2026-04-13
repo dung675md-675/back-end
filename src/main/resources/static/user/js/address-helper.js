@@ -27,8 +27,7 @@ const AddressHelper = {
             });
 
             // Handle Province Change
-            provinceSelect.addEventListener('change', async function() {
-                const pCode = this.value;
+            const handleProvinceChange = async (pCode, selectedDistrictName = null, selectedWardName = null) => {
                 districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
                 wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
                 districtSelect.disabled = !pCode;
@@ -44,12 +43,21 @@ const AddressHelper = {
                         opt.dataset.name = d.name;
                         districtSelect.add(opt);
                     });
+
+                    if (selectedDistrictName) {
+                        for (let i = 0; i < districtSelect.options.length; i++) {
+                            if (districtSelect.options[i].text === selectedDistrictName) {
+                                districtSelect.selectedIndex = i;
+                                await handleDistrictChange(districtSelect.value, selectedWardName);
+                                break;
+                            }
+                        }
+                    }
                 }
-            });
+            };
 
             // Handle District Change
-            districtSelect.addEventListener('change', async function() {
-                const dCode = this.value;
+            const handleDistrictChange = async (dCode, selectedWardName = null) => {
                 wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
                 wardSelect.disabled = !dCode;
 
@@ -63,14 +71,33 @@ const AddressHelper = {
                         opt.dataset.name = w.name;
                         wardSelect.add(opt);
                     });
-                }
-            });
 
-            // Preselect if data is provided (Not yet implemented fully for auto-loading but structure is ready)
+                    if (selectedWardName) {
+                        for (let i = 0; i < wardSelect.options.length; i++) {
+                            if (wardSelect.options[i].text === selectedWardName) {
+                                wardSelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+            };
+
+            provinceSelect.addEventListener('change', (e) => handleProvinceChange(e.target.value));
+            districtSelect.addEventListener('change', (e) => handleDistrictChange(e.target.value));
+
+            // Preselect if data is provided (by name)
             if (preselectedData) {
-                // Implementation for preselecting would require finding the matching names, which is a bit complex 
-                // due to string matching variations ("TP. Hồ Chí Minh" vs "Thành phố Hồ Chí Minh").
-                // For this project, we'll focus on creating the address string.
+                const { province, district, ward } = preselectedData;
+                if (province) {
+                    for (let i = 0; i < provinceSelect.options.length; i++) {
+                        if (provinceSelect.options[i].text === province) {
+                            provinceSelect.selectedIndex = i;
+                            await handleProvinceChange(provinceSelect.value, district, ward);
+                            break;
+                        }
+                    }
+                }
             }
 
         } catch (error) {

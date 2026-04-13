@@ -1,138 +1,179 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý khách hàng - Secondhand Shop</title>
+    <title>Quản lý khách hàng - Secondhand Shop Admin</title>
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-<header>
-    <div class="header-container">
-        <div class="logo">
-            <h1>Secondhand Shop</h1>
-            <p>Hệ thống quản lý bán hàng second-hand</p>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.html">Trang chủ</a></li>
-                <li><a href="categories.html">Danh mục</a></li>
-                <li><a href="products.html">Sản phẩm</a></li>
-                <li><a href="orders.html">Đơn hàng</a></li>
-                <li><a href="customers.html" class="active">Khách hàng</a></li>
-                <li><a href="#" onclick="logoutAdmin()" style="color:#ff4d4d">Đăng xuất</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<main class="container">
-    <div class="card">
-        <div class="card-header">
-            <h1 class="card-title">Quản lý khách hàng</h1>
-        </div>
-
-        <div class="stats-container" style="margin-bottom: 1.5rem;">
-            <div class="stat-card">
-                <h3>Tổng khách hàng</h3>
-                <div class="stat-value" id="totalCustomers">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Tổng đơn hàng</h3>
-                <div class="stat-value" id="totalOrders">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>Tổng chi tiêu</h3>
-                <div class="stat-value" id="totalSpent">0đ</div>
-            </div>
-            <div class="stat-card">
-                <h3>Chi tiêu trung bình / KH</h3>
-                <div class="stat-value" id="avgSpent">0đ</div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Tìm kiếm khách hàng theo tên, email, số điện thoại hoặc level..."
-                onkeyup="searchCustomers()"
-            >
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Họ tên</th>
-                    <th>Email</th>
-                    <th>Số điện thoại</th>
-                    <th>Level</th>
-                    <th>Địa chỉ</th>
-                    <th>Tổng đơn</th>
-                    <th>Tổng chi tiêu</th>
-                    <th>Voucher đã gắn</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody id="customersTableBody">
-                <tr>
-                    <td colspan="10" class="loading">
-                        <div class="spinner"></div>
-                        <p>Đang tải dữ liệu khách hàng...</p>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-
-<div id="customerEditModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Chỉnh sửa thông tin khách hàng</h2>
-            <button class="close-btn" onclick="closeCustomerEditModal()">&times;</button>
-        </div>
-
-        <form id="customerForm" onsubmit="submitCustomer(event)">
-            <input type="hidden" id="customerId">
-
-            <div class="form-group">
-                <label for="customerAddress">Địa chỉ</label>
-                <textarea id="customerAddress" placeholder="Nhập địa chỉ đầy đủ"></textarea>
-            </div>
-
-            <div class="grid grid-3">
-                <div class="form-group">
-                    <label for="customerCity">Tỉnh / Thành phố</label>
-                    <input type="text" id="customerCity" placeholder="Ví dụ: Hà Nội">
+    <div class="admin-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <h1><i class='bx bxs-shopping-bag'></i> 2hand Admin</h1>
                 </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="index.html"><i class='bx bx-home-alt nav-icon'></i> Tổng quan</a></li>
+                    <li><a href="categories.html"><i class='bx bx-category nav-icon'></i> Danh mục</a></li>
+                    <li><a href="products.html"><i class='bx bx-package nav-icon'></i> Sản phẩm</a></li>
+                    <li><a href="orders.html"><i class='bx bx-cart nav-icon'></i> Đơn hàng</a></li>
+                    <li><a href="customers.html" class="active"><i class='bx bx-user nav-icon'></i> Khách hàng</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" onclick="logoutAdmin()" class="logout-btn">
+                    <i class='bx bx-log-out'></i> Đăng xuất
+                </a>
+            </div>
+        </aside>
 
-                <div class="form-group">
-                    <label for="customerDistrict">Quận / Huyện</label>
-                    <input type="text" id="customerDistrict" placeholder="Ví dụ: Ba Đình">
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="page-title">Quản lý khách hàng</h1>
+            </div>
+
+            <!-- STATISTICS GRID -->
+            <div class="stats-container" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class='bx bx-user'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Tổng khách hàng</h3>
+                        <div class="stat-value" id="totalCustomers">0</div>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="customerWard">Phường / Xã</label>
-                    <input type="text" id="customerWard" placeholder="Ví dụ: Phúc Xá">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class='bx bx-cart'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Tổng đơn hàng</h3>
+                        <div class="stat-value" id="totalOrders">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class='bx bx-money'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Tổng chi tiêu</h3>
+                        <div class="stat-value" id="totalSpent">0đ</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class='bx bx-stats'></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Chi tiêu TB / KH</h3>
+                        <div class="stat-value" id="avgSpent">0đ</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Lưu thay đổi
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Danh sách khách hàng</h2>
+                </div>
 
-<script src="./js/config.js"></script>
-<script src="./js/auth.js"></script>
-<script src="./js/api.js"></script>
-<script src="./js/customers-management.js"></script>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Tìm kiếm khách hàng theo tên, email, số điện thoại hoặc level..."
+                        onkeyup="searchCustomers()"
+                    >
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Level</th>
+                            <th>Địa chỉ</th>
+                            <th>Tổng đơn</th>
+                            <th>Tổng chi tiêu</th>
+                            <th>Voucher đã gắn</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">
+                                <div class="spinner"></div>
+                                <p>Đang tải dữ liệu khách hàng...</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL EDIT CUSTOMER -->
+    <div id="customerEditModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Chỉnh sửa thông tin khách hàng</h2>
+                <button class="close-btn" onclick="closeCustomerEditModal()">&times;</button>
+            </div>
+
+            <form id="customerForm" class="modal-body" onsubmit="submitCustomer(event)">
+                <input type="hidden" id="customerId">
+
+                <div class="form-group">
+                    <label for="customerAddress">Địa chỉ cụ thể</label>
+                    <textarea id="customerAddress" placeholder="Số nhà, tên đường..."></textarea>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label for="customerCity">Tỉnh / Thành phố</label>
+                        <select id="customerCity">
+                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerDistrict">Quận / Huyện</label>
+                        <select id="customerDistrict" disabled>
+                            <option value="">-- Chọn Quận/Huyện --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerWard">Phường / Xã</label>
+                        <select id="customerWard" disabled>
+                            <option value="">-- Chọn Phường/Xã --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding: 1.5rem 2.5rem; background: #f8fafc; border-top: 1px solid var(--border-light); margin: 0 -2.5rem -2.5rem; border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeCustomerEditModal()" style="flex: 1;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="../user/js/address-helper.js"></script>
+    <script src="./js/customers-management.js"></script>
 </body>
 </html>

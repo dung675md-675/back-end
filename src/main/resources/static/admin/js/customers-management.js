@@ -699,9 +699,14 @@ async function editCustomer(id) {
         const customer = await fetchGet(`${API_ENDPOINTS.CUSTOMERS}/${id}`);
         document.getElementById('customerId').value = customer.id;
         document.getElementById('customerAddress').value = customer.address || '';
-        document.getElementById('customerCity').value = customer.city || '';
-        document.getElementById('customerDistrict').value = customer.district || '';
-        document.getElementById('customerWard').value = customer.ward || '';
+        
+        // Initialize cascading selects with pre-selected data
+        await AddressHelper.init('customerCity', 'customerDistrict', 'customerWard', {
+            province: customer.city,
+            district: customer.district,
+            ward: customer.ward
+        });
+
         document.getElementById('customerEditModal').classList.add('show');
     } catch (error) {
         showNotification('Không thể tải thông tin khách hàng.', 'error');
@@ -716,11 +721,17 @@ async function submitCustomer(event) {
     event.preventDefault();
 
     const id = document.getElementById('customerId').value;
+    
+    // Get text value from selects
+    const citySelect = document.getElementById('customerCity');
+    const districtSelect = document.getElementById('customerDistrict');
+    const wardSelect = document.getElementById('customerWard');
+
     const data = {
         address: document.getElementById('customerAddress').value,
-        city: document.getElementById('customerCity').value,
-        district: document.getElementById('customerDistrict').value,
-        ward: document.getElementById('customerWard').value
+        city: citySelect.selectedIndex > 0 ? citySelect.options[citySelect.selectedIndex].text : '',
+        district: districtSelect.selectedIndex > 0 ? districtSelect.options[districtSelect.selectedIndex].text : '',
+        ward: wardSelect.selectedIndex > 0 ? wardSelect.options[wardSelect.selectedIndex].text : ''
     };
 
     try {
@@ -753,6 +764,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     injectEnhancedCustomerStyles();
     injectVoucherManagementPanel();
     injectVoucherConfirmModal();
+    
+    // Initialize address helper for the modal dropdowns
+    AddressHelper.init('customerCity', 'customerDistrict', 'customerWard');
+    
     await Promise.all([loadCustomers(), loadCoupons()]);
 });
 

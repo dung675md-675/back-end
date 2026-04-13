@@ -38,28 +38,40 @@ public class AdminDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!adminEnabled || userRepository.existsByUsername(adminUsername)) {
+        if (!adminEnabled) {
             return;
         }
 
+        User admin = userRepository.findByUsername(adminUsername).orElse(null);
+        
         Role adminRole = roleRepository.findByName("ADMIN")
                 .orElseGet(() -> roleRepository.save(Role.builder()
                         .name("ADMIN")
                         .description("Administrator")
                         .build()));
 
-        if (userRepository.existsByEmail(adminEmail)) {
-            return;
-        }
+        if (admin == null) {
+            // Check email uniquely only for new creation
+            if (userRepository.existsByEmail(adminEmail)) {
+                return;
+            }
 
-        userRepository.save(User.builder()
-                .username(adminUsername)
-                .password(passwordEncoder.encode(adminPassword))
-                .email(adminEmail)
-                .fullName(adminFullName)
-                .phone(adminPhone)
-                .role(adminRole)
-                .status(User.UserStatus.ACTIVE)
-                .build());
+            userRepository.save(User.builder()
+                    .username(adminUsername)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .email(adminEmail)
+                    .fullName(adminFullName)
+                    .phone(adminPhone)
+                    .role(adminRole)
+                    .status(User.UserStatus.ACTIVE)
+                    .build());
+            System.out.println("=== ADMIN USER CREATED: " + adminUsername);
+        } else {
+            // Force update password to match application.yml for recovery
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setRole(adminRole); // Ensure role is correct
+            userRepository.save(admin);
+            System.out.println("=== ADMIN USER PASSWORD UPDATED from config: " + adminUsername);
+        }
     }
 }

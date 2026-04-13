@@ -88,10 +88,10 @@ function renderProducts(products) {
             <td>${product.views || 0}</td>
             <td class="table-actions">
                 <button class="btn btn-secondary btn-sm" onclick="editProduct(${product.id})">
-                    ✏️ Sửa
+                    Sửa
                 </button>
                 <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
-                    🗑️ Xóa
+                    Xóa
                 </button>
             </td>
         </tr>
