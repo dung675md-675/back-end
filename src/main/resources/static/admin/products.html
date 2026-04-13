@@ -47,20 +47,25 @@
             </button>
         </div>
 
-        <!-- FILTERS -->
-        <div class="grid grid-3" style="margin-bottom: 1.5rem;">
-            <div class="form-group">
+        <!-- PROFESSIONAL FILTER BAR -->
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <i class='bx bx-search'></i>
                 <input type="text"
                        id="searchInput"
-                       placeholder="Tìm kiếm sản phẩm..."
+                       placeholder="Tìm kiếm theo tên hoặc ID sản phẩm..."
                        onkeyup="searchProducts()">
             </div>
-            <div class="form-group">
+            
+            <div class="filter-select-wrapper">
+                <span class="filter-label">Danh mục</span>
                 <select id="categoryFilter" onchange="filterProducts()">
                     <option value="">Tất cả danh mục</option>
                 </select>
             </div>
-            <div class="form-group">
+
+            <div class="filter-select-wrapper">
+                <span class="filter-label">Trạng thái</span>
                 <select id="statusFilter" onchange="filterProducts()">
                     <option value="">Tất cả trạng thái</option>
                     <option value="AVAILABLE">Còn hàng</option>

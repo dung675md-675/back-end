@@ -463,6 +463,77 @@ textarea {
 }
 
 /* ===================================
+   SEARCH & FILTER BAR (Professional)
+   =================================== */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    align-items: center;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 2;
+    min-width: 280px;
+}
+
+.search-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.search-wrapper input {
+    padding-left: 2.75rem !important;
+    background: #f8fafc;
+    border-color: transparent;
+    transition: all 0.3s;
+}
+
+.search-wrapper input:focus {
+    background: #fff;
+    border-color: var(--vp-c-brand);
+}
+
+.filter-select-wrapper {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+.filter-select-wrapper select {
+    background: #f8fafc;
+    border-color: transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.filter-select-wrapper select:focus {
+    background: #fff;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* ===================================
    BADGES
    =================================== */
 .badge {

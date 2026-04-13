@@ -84,13 +84,17 @@
                     <h2 class="card-title">Danh sách khách hàng</h2>
                 </div>
 
-                <div class="form-group" style="margin-top: 1.5rem;">
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Tìm kiếm khách hàng theo tên, email, số điện thoại hoặc level..."
-                        onkeyup="searchCustomers()"
-                    >
+                <!-- PROFESSIONAL FILTER BAR -->
+                <div class="filter-bar" style="margin-top: 1.5rem;">
+                    <div class="search-wrapper" style="flex: 1;">
+                        <i class='bx bx-search'></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Tìm khách hàng theo tên, email, SĐT..."
+                            onkeyup="searchCustomers()"
+                        >
+                    </div>
                 </div>
 
                 <div class="table-container">

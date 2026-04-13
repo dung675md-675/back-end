@@ -94,15 +94,18 @@
                 </div>
             </div>
 
-            <!-- FILTERS -->
-            <div class="grid grid-2" style="margin-bottom: 1.5rem;">
-                <div class="form-group">
+            <!-- PROFESSIONAL FILTER BAR -->
+            <div class="filter-bar" style="margin-top: 1.5rem;">
+                <div class="search-wrapper" style="flex: 1;">
+                    <i class='bx bx-search'></i>
                     <input type="text" 
                            id="searchInput" 
-                           placeholder="Tìm kiếm đơn hàng (mã đơn, khách hàng, SĐT)..."
+                           placeholder="Tìm theo mã đơn, khách hàng, SĐT..."
                            onkeyup="searchOrders()">
                 </div>
-                <div class="form-group">
+                
+                <div class="filter-select-wrapper">
+                    <span class="filter-label">Trạng thái</span>
                     <select id="statusFilter" onchange="filterOrders()">
                         <option value="">Tất cả trạng thái</option>
                         <option value="PENDING">Chờ duyệt</option>
