@@ -105,28 +105,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Địa chỉ</label>
-                    <textarea id="address" 
-                              placeholder="Số nhà, tên đường"
-                              rows="2"
-                              autocomplete="street-address"></textarea>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="city">Thành phố</label>
-                        <input type="text" 
-                               id="city" 
-                               placeholder="Hà Nội"
-                               autocomplete="address-level1">
+                    <label>Địa chỉ</label>
+                    <div class="grid-2" style="margin-bottom: 1rem;">
+                        <select id="province" class="form-control" required>
+                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                        </select>
+                        <select id="district" class="form-control" disabled required>
+                            <option value="">-- Chọn Quận/Huyện --</option>
+                        </select>
                     </div>
-
-                    <div class="form-group">
-                        <label for="district">Quận/Huyện</label>
-                        <input type="text" 
-                               id="district" 
-                               placeholder="Hoàn Kiếm"
-                               autocomplete="address-level2">
+                    <div class="grid-2" style="margin-bottom: 1rem;">
+                        <select id="ward" class="form-control" disabled required>
+                            <option value="">-- Chọn Phường/Xã --</option>
+                        </select>
+                        <input type="text" id="street" class="form-control" placeholder="Số nhà, tên đường..." required>
                     </div>
                 </div>
 
@@ -208,11 +200,14 @@
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/address-helper.js"></script>
     <script>
-        // Kiểm tra nếu đã đăng nhập thì redirect
-        if (isLoggedIn()) {
-            window.location.href = 'index.html';
-        }
+        document.addEventListener('DOMContentLoaded', async function() {
+            await AddressHelper.init('province', 'district', 'ward');
+            if (isLoggedIn()) {
+                window.location.href = 'index.html';
+            }
+        });
 
         async function handleRegister(event) {
             event.preventDefault();
@@ -230,16 +225,25 @@
                 return;
             }
 
+            if (!AddressHelper.validateAddressSelection('street', 'province', 'district', 'ward')) {
+                showNotification('Vui lòng chọn đầy đủ cấp địa chỉ.', 'error');
+                return;
+            }
+
+            const provinceOpt = document.getElementById('province').options[document.getElementById('province').selectedIndex];
+            const districtOpt = document.getElementById('district').options[document.getElementById('district').selectedIndex];
+            const wardOpt = document.getElementById('ward').options[document.getElementById('ward').selectedIndex];
+
             const registerData = {
                 username: document.getElementById('username').value.trim(),
                 password: password,
                 email: document.getElementById('email').value.trim(),
                 fullName: document.getElementById('fullName').value.trim(),
                 phone: document.getElementById('phone').value.trim(),
-                address: document.getElementById('address').value.trim(),
-                city: document.getElementById('city').value.trim(),
-                district: document.getElementById('district').value.trim(),
-                ward: ''
+                address: AddressHelper.getFullAddress('street', 'province', 'district', 'ward'),
+                city: provinceOpt ? provinceOpt.text : '',
+                district: districtOpt ? districtOpt.text : '',
+                ward: wardOpt ? wardOpt.text : ''
             };
 
             if (!registerData.username || !registerData.email || !registerData.fullName) {

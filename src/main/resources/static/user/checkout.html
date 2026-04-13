@@ -61,9 +61,21 @@
                                style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
                     </div>
                     <div class="form-group">
-                        <label for="address">Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
-                        <textarea id="address" class="form-control" rows="3"
-                                  placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Thành phố..." required></textarea>
+                        <label>Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
+                        <div class="grid-2" style="margin-bottom: 1rem;">
+                            <select id="province" class="form-control" required>
+                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                            </select>
+                            <select id="district" class="form-control" disabled required>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 1rem;">
+                            <select id="ward" class="form-control" disabled required>
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                            <input type="text" id="street" class="form-control" placeholder="Số nhà, tên đường..." required>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="note">Ghi chú cho đơn hàng</label>
@@ -181,7 +193,9 @@
     window.currentItems = currentItems;
     window.currentSubtotal = currentSubtotal;
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        await AddressHelper.init('province', 'district', 'ward');
+        
         if (!isLoggedIn()) {
             showNotification('Vui lòng đăng nhập để tiếp tục!', 'warning');
             window.location.href = '../login.html';
@@ -301,14 +315,19 @@
     async function handlePlaceOrder(items) {
         const fullName = document.getElementById('fullName').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        const address = document.getElementById('address').value.trim();
         const note = document.getElementById('note').value.trim();
 
         const phoneDigits = phone.replace(/\D/g, '');
-        if (!fullName || !phone || !address) {
-            showNotification('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.', 'warning');
+        if (!fullName || !phone) {
+            showNotification('Vui lòng điền đầy đủ Họ tên và Số điện thoại.', 'warning');
             return;
         }
+        
+        if (!AddressHelper.validateAddressSelection('street', 'province', 'district', 'ward')) {
+            showNotification('Vui lòng chọn đầy đủ cấp địa chỉ và nhập Số nhà.', 'warning');
+            return;
+        }
+        const fullAddress = AddressHelper.getFullAddress('street', 'province', 'district', 'ward');
         if (!/^0\d{9}$/.test(phoneDigits)) {
             showNotification('Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số, bắt đầu bằng 0.', 'warning');
             return;
@@ -346,7 +365,7 @@
 
         const payload = {
             customerId: customerId,
-            shippingAddress: address,
+            shippingAddress: fullAddress,
             shippingPhone: phone,
             note: note,
             totalAmount: subtotal,
@@ -482,6 +501,7 @@
         document.getElementById('finalAmount').textContent = formatCurrency(Math.max(0, finalAmount));
     }
 </script>
+<script src="js/address-helper.js"></script>
 <script src="js/checkout-vouchers.js"></script>
 </body>
 </html>
