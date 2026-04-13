@@ -6,7 +6,7 @@
     <title>Đơn hàng của tôi - Secondhand Shop</title>
     <link rel="stylesheet" href="css/user-style.css">
     <style>
-        body { background: #f5f5f5; }
+        body { background: var(--dark-color); }
 
         .orders-wrapper {
             max-width: 960px;
@@ -16,10 +16,11 @@
 
         /* ===== PAGE HEADER + TABS ===== */
         .orders-page-header {
-            background: white;
+            background: var(--light-gray);
             border-radius: 8px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
             overflow: hidden;
         }
 
@@ -27,12 +28,12 @@
             padding: 20px 24px 0;
             font-size: 1rem;
             font-weight: 600;
-            color: #333;
+            color: var(--text-color);
         }
 
         .status-tabs {
             display: flex;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
             margin-top: 12px;
             overflow-x: auto;
         }
@@ -40,7 +41,7 @@
         .status-tab {
             padding: 12px 20px;
             font-size: 0.88rem;
-            color: #777;
+            color: var(--text-gray);
             cursor: pointer;
             border-bottom: 2px solid transparent;
             white-space: nowrap;
@@ -53,17 +54,18 @@
 
         .status-tab:hover { color: #ee4d2d; }
         .status-tab.active {
-            color: #ee4d2d;
-            border-bottom-color: #ee4d2d;
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
             font-weight: 600;
         }
 
         /* ===== ORDER CARD ===== */
         .order-card {
-            background: white;
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
         }
 
@@ -75,8 +77,8 @@
             border-bottom: 1px solid #f5f5f5;
         }
 
-        .order-code { font-size: 0.85rem; color: #888; }
-        .order-code span { color: #333; font-weight: 600; }
+        .order-code { font-size: 0.85rem; color: var(--text-gray); }
+        .order-code span { color: var(--text-color); font-weight: 600; }
 
         .order-status-badge {
             display: flex;
@@ -99,13 +101,13 @@
             align-items: center;
             gap: 10px;
             padding: 12px 20px;
-            background: #fffaf9;
-            border-bottom: 1px solid #f5f5f5;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-color);
             font-size: 0.85rem;
-            color: #555;
+            color: var(--text-gray);
         }
 
-        .delivery-date { font-weight: 600; color: #333; }
+        .delivery-date { font-weight: 600; color: var(--text-color); }
 
         /* Item row */
         .order-item-row {
@@ -129,7 +131,7 @@
 
         .order-item-name {
             font-size: 0.9rem;
-            color: #222;
+            color: var(--text-color);
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -141,7 +143,7 @@
 
         .order-item-price {
             font-size: 0.9rem;
-            color: #555;
+            color: var(--text-color);
             text-align: right;
             flex-shrink: 0;
         }
@@ -157,13 +159,13 @@
         }
 
         .order-total-label { font-size: 0.82rem; color: #999; margin-bottom: 2px; }
-        .order-total-value { font-size: 1.1rem; font-weight: 700; color: #ee4d2d; }
+        .order-total-value { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
 
         .order-actions { display: flex; gap: 10px; }
 
         .btn-rebuy {
-            background: #ee4d2d;
-            color: white;
+            background: var(--primary-color);
+            color: var(--dark-color);
             border: none;
             padding: 9px 22px;
             border-radius: 4px;
@@ -173,7 +175,7 @@
             transition: background 0.2s;
         }
 
-        .btn-rebuy:hover { background: #d73211; }
+        .btn-rebuy:hover { background: var(--primary-dark); }
 
         .btn-review {
             background: white;
@@ -186,23 +188,24 @@
             transition: all 0.2s;
         }
 
-        .btn-review:hover { border-color: #ee4d2d; color: #ee4d2d; }
+        .btn-review:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
         /* Empty */
         .empty-orders {
             text-align: center;
             padding: 80px 20px;
-            background: white;
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
         }
 
         .empty-orders-icon { font-size: 4rem; margin-bottom: 16px; }
-        .empty-orders h3 { color: #555; margin-bottom: 8px; }
+        .empty-orders h3 { color: var(--text-color); margin-bottom: 8px; }
         .empty-orders p { color: #999; font-size: 0.9rem; margin-bottom: 24px; }
 
         .btn-shop {
-            background: #ee4d2d;
-            color: white;
+            background: var(--primary-color);
+            color: var(--dark-color);
             padding: 12px 32px;
             border-radius: 4px;
             text-decoration: none;
@@ -214,8 +217,9 @@
         .loading-state {
             text-align: center;
             padding: 60px;
-            color: #999;
-            background: white;
+            color: var(--text-gray);
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
         }
 
@@ -225,7 +229,7 @@
             width: 32px;
             height: 32px;
             border: 3px solid #eee;
-            border-top-color: #ee4d2d;
+            border-top-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 12px;

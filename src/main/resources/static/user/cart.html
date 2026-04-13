@@ -6,7 +6,7 @@
     <title>Giỏ hàng - Secondhand Shop</title>
     <link rel="stylesheet" href="css/user-style.css">
     <style>
-        body { background: #f5f5f5; }
+        body { background: var(--dark-color); }
 
         .cart-page-wrapper {
             max-width: 1200px;
@@ -17,7 +17,7 @@
         .cart-page-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #333;
+            color: var(--text-color);
             margin-bottom: 16px;
             display: flex;
             align-items: center;
@@ -26,31 +26,32 @@
 
         /* ===== HEADER ROW ===== */
         .cart-header-row {
-            background: white;
+            background: var(--light-gray);
             border-radius: 8px;
             padding: 14px 20px;
             display: grid;
             grid-template-columns: 40px 2fr 1fr 160px 1fr 80px;
             align-items: center;
             font-size: 0.85rem;
-            color: #888;
+            color: var(--text-gray);
             font-weight: 500;
             margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-sm);
         }
 
         /* ===== CART ITEM CARD ===== */
         .cart-item-card {
-            background: white;
+            background: var(--light-gray);
             border-radius: 8px;
             margin-bottom: 10px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
             transition: box-shadow 0.2s;
+            border: 1px solid var(--border-color);
         }
 
         .cart-item-card:hover {
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
         }
 
         .cart-item-row {
@@ -82,8 +83,8 @@
         }
 
         .cart-checkbox:checked {
-            background: #ee4d2d;
-            border-color: #ee4d2d;
+            background: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
         .cart-checkbox:checked::after {
@@ -111,13 +112,13 @@
             height: 80px;
             object-fit: cover;
             border-radius: 6px;
-            border: 1px solid #eee;
+            border: 1px solid var(--border-color);
             flex-shrink: 0;
         }
 
         .cart-product-name {
             font-size: 0.9rem;
-            color: #222;
+            color: var(--text-color);
             font-weight: 500;
             line-height: 1.4;
             display: -webkit-box;
@@ -129,7 +130,7 @@
         /* ===== PRICE ===== */
         .cart-unit-price {
             font-size: 0.95rem;
-            color: #555;
+            color: var(--text-color);
             text-align: center;
         }
 
@@ -137,7 +138,7 @@
         .qty-controls {
             display: flex;
             align-items: center;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             overflow: hidden;
             width: fit-content;
@@ -147,35 +148,36 @@
         .qty-btn {
             width: 32px;
             height: 32px;
-            background: #f5f5f5;
+            background: var(--dark-color);
             border: none;
             cursor: pointer;
             font-size: 1rem;
-            color: #333;
+            color: var(--text-color);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background 0.15s;
         }
 
-        .qty-btn:hover { background: #e0e0e0; }
+        .qty-btn:hover { background: var(--border-color); }
 
         .qty-input {
             width: 44px;
             height: 32px;
             text-align: center;
             border: none;
-            border-left: 1px solid #ddd;
-            border-right: 1px solid #ddd;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
             font-size: 0.9rem;
-            color: #333;
+            color: var(--text-color);
+            background: transparent;
             outline: none;
         }
 
         /* ===== SUBTOTAL ===== */
         .cart-subtotal {
             font-size: 0.95rem;
-            color: #ee4d2d;
+            color: var(--primary-color);
             font-weight: 600;
             text-align: center;
         }
@@ -196,22 +198,22 @@
         }
 
         .cart-delete-btn:hover {
-            color: #ee4d2d;
-            background: #fff0ee;
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
         }
 
         /* ===== STICKY BOTTOM BAR ===== */
         .cart-bottom-bar {
             position: sticky;
             bottom: 0;
-            background: white;
-            border-top: 2px solid #ee4d2d;
+            background: var(--light-gray);
+            border-top: 2px solid var(--primary-color);
             border-radius: 0 0 8px 8px;
             padding: 14px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.4);
             margin-top: 12px;
             z-index: 100;
         }
@@ -251,7 +253,7 @@
         .total-value {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #ee4d2d;
+            color: var(--primary-color);
         }
 
         .checkout-btn {
@@ -278,9 +280,10 @@
         .empty-cart {
             text-align: center;
             padding: 80px 20px;
-            background: white;
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-sm);
         }
 
         .empty-cart-icon { font-size: 5rem; margin-bottom: 16px; }
@@ -288,8 +291,8 @@
         .empty-cart p { color: #999; margin-bottom: 24px; }
 
         .btn-shop-now {
-            background: #ee4d2d;
-            color: white;
+            background: var(--primary-color);
+            color: var(--dark-color);
             padding: 12px 32px;
             border-radius: 4px;
             text-decoration: none;
@@ -298,7 +301,7 @@
             transition: background 0.2s;
         }
 
-        .btn-shop-now:hover { background: #d73211; }
+        .btn-shop-now:hover { background: var(--primary-dark); }
 
         /* ===== ITEM SELECTED STATE ===== */
         .cart-item-card.selected {

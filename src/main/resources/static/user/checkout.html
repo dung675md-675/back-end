@@ -16,16 +16,16 @@
 
         /* ===== VOUCHER BOX ===== */
         .voucher-box {
-            border: 1.5px dashed #c4b5fd;
+            border: 1.5px dashed var(--primary-color);
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 14px;
-            background: #faf8ff;
+            background: rgba(212, 175, 55, 0.05);
         }
         .voucher-label {
             font-size: 13px;
             font-weight: 600;
-            color: #6c3fc5;
+            color: var(--primary-color);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -38,17 +38,19 @@
         .voucher-input {
             flex: 1;
             padding: 9px 12px;
-            border: 1.5px solid #e0e0e0;
+            border: 1px solid var(--border-color);
+            background: var(--dark-color);
+            color: var(--text-color);
             border-radius: 8px;
             font-size: 14px;
             text-transform: uppercase;
             outline: none;
             transition: border-color 0.2s;
         }
-        .voucher-input:focus { border-color: #6c3fc5; }
+        .voucher-input:focus { border-color: var(--primary-color); }
         .btn-apply-voucher {
-            background: #6c3fc5;
-            color: white;
+            background: var(--primary-color);
+            color: var(--dark-color);
             border: none;
             padding: 9px 16px;
             border-radius: 8px;
@@ -79,20 +81,20 @@
         }
         .voucher-result.success {
             display: block;
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
         }
         .voucher-result.error {
             display: block;
-            background: #fce4ec;
-            color: #c62828;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
         }
         .discount-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
         }
-        .discount-value { color: #2e7d32; font-weight: 600; }
+        .discount-value { color: var(--success-color); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -139,7 +141,7 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" class="form-control" disabled
-                               style="background: var(--light-gray); cursor: not-allowed; opacity: 0.7;">
+                               style="background: black; cursor: not-allowed; opacity: 0.5;">
                     </div>
                     <div class="form-group">
                         <label for="address">Địa chỉ giao hàng <span style="color: var(--danger-color);">*</span></label>
@@ -173,7 +175,7 @@
                 </div>
 
                 <!-- ORDER SUMMARY -->
-                <div class="order-summary" style="background: #f9fafb; border-radius: 10px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+                <div class="order-summary" style="background: var(--light-gray); border-radius: 10px; padding: 1.5rem; border: 1px solid var(--border-color);">
                     <div style="display:flex; justify-content: space-between; margin-bottom: 0.5rem;">
                         <span>Tạm tính</span>
                         <strong id="subtotalAmount">0đ</strong>
@@ -182,10 +184,10 @@
                         <span>Giảm giá <span id="voucherCodeDisplay" style="font-size:12px;color:#6c3fc5;"></span></span>
                         <strong id="discountAmount" class="discount-value">0đ</strong>
                     </div>
-                    <div style="height:1px; background:#e2e8f0; margin:0.75rem 0;"></div>
+                    <div style="height:1px; background:var(--border-color); margin:0.75rem 0;"></div>
                     <div style="display:flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight:600;">Tổng thanh toán</span>
-                        <span id="finalAmount" style="font-size:1.3rem; font-weight:700; color: var(--danger-color);">0đ</span>
+                        <span id="finalAmount" style="font-size:1.3rem; font-weight:700; color: var(--primary-color);">0đ</span>
                     </div>
                 </div>
 

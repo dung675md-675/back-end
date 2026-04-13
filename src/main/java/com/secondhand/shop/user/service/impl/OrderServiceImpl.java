@@ -29,9 +29,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Object createOrder(OrderRequestDTO request) {
-        // Customer có field "user" (object), dùng findByUser_Id
-        Customer customer = customerRepository.findByUser_Id(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy customer với userId: " + request.getCustomerId()));
+        // Customer có field "user" (object), dùng findById vì frontend gửi customer.id
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy customer với id: " + request.getCustomerId()));
 
         Order order = new Order();
         order.setCustomer(customer);
