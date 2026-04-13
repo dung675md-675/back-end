@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerIdAndStatus(Long customerId, Order.OrderStatus status);
 
     long countByCustomerId(Long customerId);
+
+    long countByCoupon_IdAndStatusNotIn(Long couponId, Collection<Order.OrderStatus> excludedStatuses);
+
+    boolean existsByCustomer_IdAndCoupon_IdAndStatusNotIn(
+            Long customerId,
+            Long couponId,
+            Collection<Order.OrderStatus> excludedStatuses
+    );
 
     @Query("SELECT SUM(o.finalAmount) FROM Order o WHERE o.customer.id = :customerId AND o.status = 'DELIVERED'")
     Double calculateTotalSpentByCustomer(@Param("customerId") Long customerId);

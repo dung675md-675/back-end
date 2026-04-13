@@ -134,7 +134,15 @@
                     </div>
                     <div class="form-group">
                         <label for="phone">Số điện thoại <span style="color: var(--danger-color);">*</span></label>
-                        <input type="tel" id="phone" class="form-control" placeholder="09xxxxxxxx" required>
+                        <input type="tel"
+                               id="phone"
+                               class="form-control"
+                               placeholder="09xxxxxxxx"
+                               required
+                               inputmode="numeric"
+                               pattern="^0\\d{9}$"
+                               maxlength="10"
+                               oninput="this.value = this.value.replace(/\\D/g, '').slice(0, 10);">
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
@@ -385,10 +393,16 @@
         const address = document.getElementById('address').value.trim();
         const note = document.getElementById('note').value.trim();
 
+        const phoneDigits = phone.replace(/\D/g, '');
         if (!fullName || !phone || !address) {
             showNotification('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.', 'warning');
             return;
         }
+        if (!/^0\d{9}$/.test(phoneDigits)) {
+            showNotification('Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số, bắt đầu bằng 0.', 'warning');
+            return;
+        }
+        document.getElementById('phone').value = phoneDigits;
 
         const user = getCurrentUser();
         if (!user || !user.userId) {

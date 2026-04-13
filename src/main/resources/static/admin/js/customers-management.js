@@ -262,8 +262,7 @@ function injectVoucherManagementPanel() {
     wrapper.innerHTML = `
         <h3>Tạo voucher mới và áp dụng theo level khách hàng</h3>
         <p>
-            Voucher sẽ được gắn tự động theo level đã chọn. Bạn không thể sửa/xóa voucher ở đây,
-            vì vậy hệ thống có bước xác nhận trước khi lưu.
+            Voucher sẽ được gắn tự động theo level đã chọn.
         </p>
         <div class="voucher-grid">
             <div>
@@ -297,6 +296,10 @@ function injectVoucherManagementPanel() {
             <div>
                 <label for="adminMinOrderValue">Giá trị đơn hàng tối thiểu (VNĐ)</label>
                 <input id="adminMinOrderValue" type="number" min="0" step="1000" placeholder="Ví dụ: 500000">
+            </div>
+            <div>
+                <label for="adminCouponQuantity">Số lượnng voucher</label>
+                <input id="adminCouponQuantity" type="number" min="1" step="1" placeholder="Ví dụ: 300">
             </div>
             <div class="full">
                 <label>Áp dụng cho level</label>
@@ -333,13 +336,15 @@ function injectVoucherManagementPanel() {
                             <th>Mã</th>
                             <th>Mức giảm</th>
                             <th>Đơn tối thiểu</th>
+                            <th>So luong</th>
+                            <th>Con lai</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Áp dụng cho level</th>
                         </tr>
                     </thead>
                     <tbody id="adminCouponTableBody">
-                        <tr><td colspan="7">Đang tải danh sách voucher...</td></tr>
+                        <tr><td colspan="9">Đang tải danh sách voucher...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -461,6 +466,7 @@ function collectCouponFormData() {
     const startDate = document.getElementById('adminCouponStartDate')?.value;
     const endDate = document.getElementById('adminCouponEndDate')?.value;
     const minOrderValue = parseFloat(document.getElementById('adminMinOrderValue')?.value || '0');
+    const totalQuantity = Number.parseInt(document.getElementById('adminCouponQuantity')?.value || '0', 10);
     const selectedLevels = Array.from(document.querySelectorAll('input[name="targetLevels"]:checked')).map(input => input.value);
     const targetLevels = selectedLevels.includes('ALL') ? ['ALL'] : selectedLevels;
 
@@ -485,6 +491,11 @@ function collectCouponFormData() {
         return null;
     }
 
+    if (!Number.isInteger(totalQuantity) || totalQuantity <= 0) {
+        showNotification('Vui long nhap so luong voucher hop le (lon hon 0).', 'warning');
+        return null;
+    }
+
     const payload = {
         name,
         code,
@@ -496,7 +507,8 @@ function collectCouponFormData() {
         minOrderAmount: minOrderValue,
         startDate: `${startDate}:00`,
         endDate: `${endDate}:00`,
-        targetLevels
+        targetLevels,
+        totalQuantity
     };
 
     return {
@@ -510,7 +522,8 @@ function collectCouponFormData() {
             minOrder: minOrderValue > 0 ? formatCurrency(minOrderValue) : 'Không yêu cầu',
             startDate: formatDateCell(payload.startDate),
             endDate: formatDateCell(payload.endDate),
-            levels: resolveTargetLevelLabel(targetLevels)
+            levels: resolveTargetLevelLabel(targetLevels),
+            totalQuantity
         }
     };
 }
@@ -531,6 +544,7 @@ function openVoucherConfirmModal() {
             <div class="k">Ngày bắt đầu</div><div class="v">${summary.startDate}</div>
             <div class="k">Ngày kết thúc</div><div class="v">${summary.endDate}</div>
             <div class="k">Áp dụng cho level</div><div class="v">${summary.levels}</div>
+            <div class="k">So luong voucher</div><div class="v">${summary.totalQuantity}</div>
         `;
     }
 
@@ -577,6 +591,7 @@ function resetVoucherForm() {
     document.getElementById('adminCouponStartDate').value = '';
     document.getElementById('adminCouponEndDate').value = '';
     document.getElementById('adminMinOrderValue').value = '';
+    document.getElementById('adminCouponQuantity').value = '';
     document.querySelectorAll('input[name="targetLevels"]').forEach(input => {
         input.checked = false;
         input.disabled = false;
@@ -591,7 +606,7 @@ async function loadCoupons() {
         couponsData = await fetchGet(`${API_BASE_URL}/coupons`);
         renderCouponTable(couponsData);
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="7">Không thể tải danh sách voucher.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">Không thể tải danh sách voucher.</td></tr>';
     }
 }
 
@@ -600,7 +615,7 @@ function renderCouponTable(coupons) {
     if (!tbody) return;
 
     if (!Array.isArray(coupons) || coupons.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">Chưa có voucher nào.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">Chưa có voucher nào.</td></tr>';
         return;
     }
 
@@ -610,6 +625,8 @@ function renderCouponTable(coupons) {
             <td><span class="voucher-code">${coupon.code || '-'}</span></td>
             <td>${resolveDiscountLabel(coupon)}</td>
             <td>${(coupon.minOrderValue || coupon.minOrderAmount) ? formatCurrency(coupon.minOrderValue || coupon.minOrderAmount) : '-'}</td>
+            <td>${coupon.totalQuantity ?? '-'}</td>
+            <td>${coupon.remainingQuantity ?? '-'}</td>
             <td>${formatDateCell(coupon.startDate)}</td>
             <td>${formatDateCell(coupon.endDate || coupon.expiryDate)}</td>
             <td>${resolveTargetLevelLabel(coupon.targetLevels)}</td>
@@ -738,3 +755,4 @@ document.addEventListener('DOMContentLoaded', async function() {
     injectVoucherConfirmModal();
     await Promise.all([loadCustomers(), loadCoupons()]);
 });
+

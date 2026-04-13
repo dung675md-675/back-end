@@ -66,6 +66,9 @@ public class Coupon {
     @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
 
+    @Column(name = "total_quantity")
+    private Integer totalQuantity;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

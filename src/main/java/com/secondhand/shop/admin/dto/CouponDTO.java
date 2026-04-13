@@ -31,6 +31,8 @@ public class CouponDTO {
     private String startDate;
     private String endDate;
     private String expiryDate;
+    private Integer totalQuantity;
+    private Integer remainingQuantity;
     private List<String> targetLevels;
     private String discountLabel;
 
@@ -60,6 +62,7 @@ public class CouponDTO {
                 .startDate(coupon.getStartDate() != null ? coupon.getStartDate().toString() : null)
                 .endDate(coupon.getExpiryDate() != null ? coupon.getExpiryDate().toString() : null)
                 .expiryDate(coupon.getExpiryDate() != null ? coupon.getExpiryDate().toString() : null)
+                .totalQuantity(coupon.getTotalQuantity())
                 .targetLevels(Collections.emptyList())
                 .discountLabel(CouponSupport.getDiscountLabel(coupon))
                 .build();

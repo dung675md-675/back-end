@@ -7,9 +7,11 @@ import com.secondhand.shop.common.model.Coupon;
 import com.secondhand.shop.common.model.CouponAssignment;
 import com.secondhand.shop.common.model.Customer;
 import com.secondhand.shop.common.model.CustomerLevel;
+import com.secondhand.shop.common.model.Order;
 import com.secondhand.shop.common.repository.CouponAssignmentRepository;
 import com.secondhand.shop.common.repository.CouponRepository;
 import com.secondhand.shop.common.repository.CustomerRepository;
+import com.secondhand.shop.common.repository.OrderRepository;
 import com.secondhand.shop.common.support.CouponSupport;
 import com.secondhand.shop.common.support.CustomerRankSupport;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +39,12 @@ public class PrimaryCouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
     private final CouponAssignmentRepository couponAssignmentRepository;
     private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
+
+    private static final List<Order.OrderStatus> COUPON_USAGE_EXCLUDED_STATUSES = List.of(
+            Order.OrderStatus.CANCELLED,
+            Order.OrderStatus.REJECTED
+    );
 
     @Override
     @Transactional(readOnly = true)
@@ -55,7 +63,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
     public CouponDTO createCoupon(CouponDTO dto) {
         String normalizedCode = normalizeCode(dto.getCode());
         if (couponRepository.existsByCode(normalizedCode)) {
-            throw new RuntimeException("M? voucher đ? t?n t?i: " + normalizedCode);
+            throw new RuntimeException("Ma voucher da ton tai: " + normalizedCode);
         }
 
         Coupon coupon = Coupon.builder()
@@ -70,6 +78,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
                 .status(Coupon.CouponStatus.ACTIVE)
                 .startDate(parseDateTime(dto.getStartDate()))
                 .expiryDate(parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate())))
+                .totalQuantity(resolveTotalQuantityForCreate(dto))
                 .build();
 
         Coupon savedCoupon = couponRepository.save(coupon);
@@ -80,7 +89,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
     @Override
     public CouponDTO updateCoupon(Long id, CouponDTO dto) {
         Coupon coupon = couponRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y voucher"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay voucher"));
 
         coupon.setName(resolveName(dto));
         coupon.setCode(normalizeCode(dto.getCode()));
@@ -92,6 +101,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
         coupon.setMinRank(resolveMinRank(dto));
         coupon.setStartDate(parseDateTime(dto.getStartDate()));
         coupon.setExpiryDate(parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate())));
+        coupon.setTotalQuantity(resolveTotalQuantityForUpdate(coupon, dto));
         if (dto.getStatus() != null && !dto.getStatus().isBlank()) {
             coupon.setStatus(Coupon.CouponStatus.valueOf(dto.getStatus()));
         }
@@ -117,14 +127,14 @@ public class PrimaryCouponServiceImpl implements CouponService {
     @Transactional(readOnly = true)
     public CouponDTO validateCoupon(String code, Long customerId) {
         Coupon coupon = couponRepository.findByCode(normalizeCode(code))
-                .orElseThrow(() -> new RuntimeException("M? gi?m giá không h?p l?"));
+                .orElseThrow(() -> new RuntimeException("Ma giam gia khong hop le"));
 
         if (!CouponSupport.isActiveAt(coupon, LocalDateTime.now())) {
-            throw new RuntimeException("Voucher hi?n không c?n hi?u l?c");
+            throw new RuntimeException("Voucher hien khong con hieu luc");
         }
 
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay khach hang"));
 
         List<CouponAssignment> assignments = couponAssignmentRepository.findByCouponId(coupon.getId());
         if (!assignments.isEmpty()) {
@@ -139,14 +149,18 @@ public class PrimaryCouponServiceImpl implements CouponService {
             }
 
             if (!matched) {
-                throw new RuntimeException("Voucher này chưa đư?c g?n cho tài kho?n c?a b?n");
+                throw new RuntimeException("Voucher nay chua duoc gan cho tai khoan cua ban");
             }
-
-            return toCouponDTO(coupon);
+        } else if (!CustomerRankSupport.meetsMinimumRank(customer.getTotalSpent(), coupon.getMinRank())) {
+            throw new RuntimeException("Hang khach hang cua ban chua du dieu kien de dung voucher nay");
         }
 
-        if (!CustomerRankSupport.meetsMinimumRank(customer.getTotalSpent(), coupon.getMinRank())) {
-            throw new RuntimeException("H?ng khách hàng c?a b?n chưa đ? đ? dùng voucher này");
+        if (hasCustomerUsedCoupon(customer.getId(), coupon.getId())) {
+            throw new RuntimeException("Moi khach hang chi duoc su dung voucher nay 1 lan");
+        }
+
+        if (isCouponExhausted(coupon)) {
+            throw new RuntimeException("Voucher da het luot su dung");
         }
 
         return toCouponDTO(coupon);
@@ -156,7 +170,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
     @Transactional(readOnly = true)
     public List<CouponDTO> getAvailableCouponsForCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay khach hang"));
 
         List<CouponAssignment> directAssignments = couponAssignmentRepository.findByCustomerId(customerId);
         List<CouponAssignment> levelAssignments = couponAssignmentRepository.findByAssignmentTypeAndTargetRank(
@@ -168,6 +182,8 @@ public class PrimaryCouponServiceImpl implements CouponService {
                 .map(CouponAssignment::getCoupon)
                 .filter(Objects::nonNull)
                 .filter(coupon -> CouponSupport.isActiveAt(coupon, LocalDateTime.now()))
+                .filter(coupon -> !hasCustomerUsedCoupon(customerId, coupon.getId()))
+                .filter(coupon -> !isCouponExhausted(coupon))
                 .collect(Collectors.collectingAndThen(
                         Collectors.toMap(Coupon::getId, coupon -> coupon, (first, ignored) -> first),
                         map -> map.values().stream()
@@ -180,11 +196,11 @@ public class PrimaryCouponServiceImpl implements CouponService {
     @Override
     public CouponAssignmentDTO assignCouponToLevel(Long couponId, String rank) {
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y voucher"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay voucher"));
 
         List<CouponAssignment> createdAssignments = createAssignmentsForLevel(coupon, rank);
         if (createdAssignments.isEmpty()) {
-            throw new RuntimeException("Không có khách hàng phù h?p trong h?ng đ? ch?n");
+            throw new RuntimeException("Khong co khach hang phu hop trong hang da chon");
         }
 
         return CouponAssignmentDTO.fromEntity(createdAssignments.get(0));
@@ -192,9 +208,9 @@ public class PrimaryCouponServiceImpl implements CouponService {
 
     public CouponAssignmentDTO assignCouponToCustomer(Long couponId, Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay khach hang"));
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y voucher"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay voucher"));
 
         CouponAssignment assignment = findOrCreateCustomerAssignment(customer, coupon);
         return CouponAssignmentDTO.fromEntity(assignment);
@@ -202,7 +218,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
 
     public List<CouponAssignmentDTO> assignCouponsToCustomer(Long customerId, List<Long> couponIds) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay khach hang"));
 
         List<Long> normalizedIds = couponIds == null ? List.of() : couponIds.stream()
                 .filter(Objects::nonNull)
@@ -214,7 +230,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
 
         List<Coupon> coupons = couponRepository.findAllById(normalizedIds);
         if (coupons.size() != normalizedIds.size()) {
-            throw new RuntimeException("Có voucher không t?n t?i trong danh sách đ? ch?n");
+            throw new RuntimeException("Co voucher khong ton tai trong danh sach da chon");
         }
 
         List<CouponAssignmentDTO> assignments = new ArrayList<>();
@@ -298,14 +314,14 @@ public class PrimaryCouponServiceImpl implements CouponService {
     private String resolveName(CouponDTO dto) {
         String candidate = firstNonBlank(dto.getName(), dto.getCode());
         if (candidate == null) {
-            throw new RuntimeException("Tên voucher không đư?c đ? tr?ng");
+            throw new RuntimeException("Ten voucher khong duoc de trong");
         }
         return candidate.trim();
     }
 
     private String normalizeCode(String code) {
         if (code == null || code.isBlank()) {
-            throw new RuntimeException("M? voucher không đư?c đ? tr?ng");
+            throw new RuntimeException("Ma voucher khong duoc de trong");
         }
         return code.trim().toUpperCase(Locale.ROOT);
     }
@@ -336,6 +352,25 @@ public class PrimaryCouponServiceImpl implements CouponService {
         return Coupon.CustomerRank.BRONZE;
     }
 
+    private Integer resolveTotalQuantityForCreate(CouponDTO dto) {
+        Integer totalQuantity = dto.getTotalQuantity();
+        if (totalQuantity == null || totalQuantity <= 0) {
+            throw new RuntimeException("So luong voucher phai lon hon 0");
+        }
+        return totalQuantity;
+    }
+
+    private Integer resolveTotalQuantityForUpdate(Coupon currentCoupon, CouponDTO dto) {
+        Integer totalQuantity = dto.getTotalQuantity();
+        if (totalQuantity == null) {
+            return currentCoupon.getTotalQuantity();
+        }
+        if (totalQuantity <= 0) {
+            throw new RuntimeException("So luong voucher phai lon hon 0");
+        }
+        return totalQuantity;
+    }
+
     private LocalDateTime parseDateTime(String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -353,6 +388,7 @@ public class PrimaryCouponServiceImpl implements CouponService {
     private CouponDTO toCouponDTO(Coupon coupon) {
         CouponDTO dto = CouponDTO.fromEntity(coupon);
         dto.setTargetLevels(resolveTargetLevels(coupon.getId()));
+        dto.setRemainingQuantity(toRemainingQuantity(coupon));
         return dto;
     }
 
@@ -378,5 +414,32 @@ public class PrimaryCouponServiceImpl implements CouponService {
         }
         return levels;
     }
-}
 
+    private boolean isCouponExhausted(Coupon coupon) {
+        Integer totalQuantity = coupon.getTotalQuantity();
+        if (totalQuantity == null || totalQuantity <= 0) {
+            return false;
+        }
+        return countCouponUsedQuantity(coupon.getId()) >= totalQuantity;
+    }
+
+    private boolean hasCustomerUsedCoupon(Long customerId, Long couponId) {
+        return orderRepository.existsByCustomer_IdAndCoupon_IdAndStatusNotIn(
+                customerId,
+                couponId,
+                COUPON_USAGE_EXCLUDED_STATUSES
+        );
+    }
+
+    private int countCouponUsedQuantity(Long couponId) {
+        return (int) orderRepository.countByCoupon_IdAndStatusNotIn(couponId, COUPON_USAGE_EXCLUDED_STATUSES);
+    }
+
+    private Integer toRemainingQuantity(Coupon coupon) {
+        Integer totalQuantity = coupon.getTotalQuantity();
+        if (totalQuantity == null || totalQuantity <= 0) {
+            return null;
+        }
+        return Math.max(0, totalQuantity - countCouponUsedQuantity(coupon.getId()));
+    }
+}

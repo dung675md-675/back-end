@@ -34,11 +34,16 @@ public class OrderServiceImpl implements OrderService {
     private final CouponRepository couponRepository;
     private final CouponAssignmentRepository couponAssignmentRepository;
 
+    private static final List<Order.OrderStatus> COUPON_USAGE_EXCLUDED_STATUSES = List.of(
+            Order.OrderStatus.CANCELLED,
+            Order.OrderStatus.REJECTED
+    );
+
     @Override
     @Transactional
     public Object createOrder(OrderRequestDTO request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y khách hàng v?i id: " + request.getCustomerId()));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay khach hang voi id: " + request.getCustomerId()));
 
         Order order = new Order();
         order.setCustomer(customer);
@@ -56,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
         double subtotal = 0.0;
         for (OrderRequestDTO.OrderItemRequestDTO itemDTO : request.getOrderItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Không t?m th?y s?n ph?m id: " + itemDTO.getProductId()));
+                    .orElseThrow(() -> new RuntimeException("Khong tim thay san pham id: " + itemDTO.getProductId()));
 
             double itemSubtotal = product.getPrice() * itemDTO.getQuantity();
             subtotal += itemSubtotal;
@@ -100,15 +105,15 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Object cancelPendingOrder(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang"));
 
         if (order.getCustomer() == null || order.getCustomer().getUser() == null
                 || !order.getCustomer().getUser().getId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này");
+            throw new RuntimeException("Ban khong co quyen huy don hang nay");
         }
 
         if (order.getStatus() != Order.OrderStatus.PENDING) {
-            throw new RuntimeException("Chỉ được hủy đơn ở trạng thái chờ xác nhận");
+            throw new RuntimeException("Chi duoc huy don o trang thai cho xac nhan");
         }
 
         order.setStatus(Order.OrderStatus.CANCELLED);
@@ -134,11 +139,11 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }
 
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new RuntimeException("Không t?m th?y voucher đ? ch?n"));
+        Coupon coupon = couponRepository.findByIdForUpdate(couponId)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay voucher da chon"));
 
         if (!CouponSupport.isActiveAt(coupon, LocalDateTime.now())) {
-            throw new RuntimeException("Voucher đ? ch?n không c?n hi?u l?c");
+            throw new RuntimeException("Voucher da chon khong con hieu luc");
         }
 
         List<CouponAssignment> assignments = couponAssignmentRepository.findByCouponId(couponId);
@@ -152,18 +157,45 @@ public class OrderServiceImpl implements OrderService {
                                 && assignment.getTargetRank() == customer.getLevel());
             }
             if (!matched) {
-                throw new RuntimeException("Voucher này chưa đư?c g?n cho tài kho?n c?a b?n");
+                throw new RuntimeException("Voucher nay chua duoc gan cho tai khoan cua ban");
             }
         } else if (!CustomerRankSupport.meetsMinimumRank(customer.getTotalSpent(), coupon.getMinRank())) {
-            throw new RuntimeException("H?ng khách hàng c?a b?n chưa đ? đ? dùng voucher này");
+            throw new RuntimeException("Hang khach hang cua ban chua du dieu kien de dung voucher nay");
+        }
+
+        if (hasCustomerUsedCoupon(customer.getId(), coupon.getId())) {
+            throw new RuntimeException("Moi khach hang chi duoc su dung voucher nay 1 lan");
+        }
+
+        if (isCouponExhausted(coupon)) {
+            throw new RuntimeException("Voucher da het luot su dung");
         }
 
         if (coupon.getMinOrderValue() != null && subtotal < coupon.getMinOrderValue()) {
             long minOrderValue = Math.round(coupon.getMinOrderValue());
-            throw new RuntimeException("Đơn hàng tối thiểu " + minOrderValue + "đ mới được dùng voucher này");
+            throw new RuntimeException("Don hang toi thieu " + minOrderValue + "d moi duoc dung voucher nay");
         }
 
         return coupon;
     }
-}
 
+    private boolean hasCustomerUsedCoupon(Long customerId, Long couponId) {
+        return orderRepository.existsByCustomer_IdAndCoupon_IdAndStatusNotIn(
+                customerId,
+                couponId,
+                COUPON_USAGE_EXCLUDED_STATUSES
+        );
+    }
+
+    private boolean isCouponExhausted(Coupon coupon) {
+        Integer totalQuantity = coupon.getTotalQuantity();
+        if (totalQuantity == null || totalQuantity <= 0) {
+            return false;
+        }
+        return countCouponUsedQuantity(coupon.getId()) >= totalQuantity;
+    }
+
+    private int countCouponUsedQuantity(Long couponId) {
+        return (int) orderRepository.countByCoupon_IdAndStatusNotIn(couponId, COUPON_USAGE_EXCLUDED_STATUSES);
+    }
+}

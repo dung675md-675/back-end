@@ -254,6 +254,10 @@ function injectVoucherManagementPanel() {
                 <label for="adminMinOrderValue">Giá trị đơn hàng tối thiểu(VND)</label>
                 <input id="adminMinOrderValue" type="number" min="0" step="1000" placeholder="Ví dụ: 500000">
             </div>
+            <div>
+                <label for="adminCouponQuantity">Số lượng voucher</label>
+                <input id="adminCouponQuantity" type="number" min="1" step="1" placeholder="Ví dụ: 300">
+            </div>
             <div class="full">
                 <label>Áp dụng cho level</label>
                 <div class="checkbox-grid">
@@ -344,6 +348,7 @@ async function createAdminCustomerCoupon() {
     const startDate = document.getElementById('adminCouponStartDate')?.value;
     const endDate = document.getElementById('adminCouponEndDate')?.value;
     const minOrderValue = parseFloat(document.getElementById('adminMinOrderValue')?.value || '0');
+    const totalQuantity = Number.parseInt(document.getElementById('adminCouponQuantity')?.value || '0', 10);
     const selectedLevels = Array.from(document.querySelectorAll('input[name="targetLevels"]:checked'))
         .map(input => input.value);
     const targetLevels = selectedLevels.includes('ALL') ? ['ALL'] : selectedLevels;
@@ -368,6 +373,10 @@ async function createAdminCustomerCoupon() {
         showNotification('Vui lòng chọn ít nhất một level để áp dụng.', 'warning');
         return;
     }
+    if (!Number.isInteger(totalQuantity) || totalQuantity <= 0) {
+        showNotification('Vui lòng nhập số lượng voucher hợp lệ (lớn hơn 0).', 'warning');
+        return;
+    }
 
     const payload = {
         name,
@@ -380,7 +389,8 @@ async function createAdminCustomerCoupon() {
         minOrderAmount: minOrderValue,
         startDate: `${startDate}:00`,
         endDate: `${endDate}:00`,
-        targetLevels
+        targetLevels,
+        totalQuantity
     };
 
     try {
@@ -391,6 +401,7 @@ async function createAdminCustomerCoupon() {
         document.getElementById('adminCouponStartDate').value = '';
         document.getElementById('adminCouponEndDate').value = '';
         document.getElementById('adminMinOrderValue').value = '';
+        document.getElementById('adminCouponQuantity').value = '';
         document.querySelectorAll('input[name="targetLevels"]').forEach(input => {
             input.checked = false;
             input.disabled = false;
