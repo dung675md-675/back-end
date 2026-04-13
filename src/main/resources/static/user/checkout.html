@@ -5,95 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thanh toán - Secondhand Shop</title>
     <link rel="stylesheet" href="css/user-style.css">
-    <style>
-        .auth-container { max-width: 900px; }
-        .auth-title { font-size: 2.4rem; }
-        .grid-2 { grid-template-columns: 1.3fr 1fr; }
-        #checkoutForm .form-group label { font-size: 1rem; }
-        #checkoutForm .form-group input,
-        #checkoutForm .form-group textarea { font-size: 1rem; }
-        #orderItemsSummary { font-size: 0.98rem; }
-
-        /* ===== VOUCHER BOX ===== */
-        .voucher-box {
-            border: 1.5px dashed #c4b5fd;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 14px;
-            background: #faf8ff;
-        }
-        .voucher-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #6c3fc5;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .voucher-input-row {
-            display: flex;
-            gap: 8px;
-        }
-        .voucher-input {
-            flex: 1;
-            padding: 9px 12px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            text-transform: uppercase;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .voucher-input:focus { border-color: #6c3fc5; }
-        .btn-apply-voucher {
-            background: #6c3fc5;
-            color: white;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: opacity 0.2s;
-        }
-        .btn-apply-voucher:hover { opacity: 0.85; }
-        .btn-remove-voucher {
-            background: #ff5252;
-            color: white;
-            border: none;
-            padding: 9px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-remove-voucher:hover { opacity: 0.85; }
-        .voucher-result {
-            margin-top: 8px;
-            font-size: 13px;
-            border-radius: 6px;
-            padding: 6px 10px;
-            display: none;
-        }
-        .voucher-result.success {
-            display: block;
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-        .voucher-result.error {
-            display: block;
-            background: #fce4ec;
-            color: #c62828;
-        }
-        .discount-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        .discount-value { color: #2e7d32; font-weight: 600; }
-    </style>
 </head>
 <body>
 <header class="main-header">
@@ -117,16 +28,16 @@
         </a>
     </div>
 
-    <div class="auth-container">
-        <h1 class="auth-title">Xác nhận đơn hàng</h1>
+    <div class="checkout-container">
+        <h1 class="checkout-title">Xác nhận đơn hàng</h1>
         <p style="text-align: center; color: var(--text-gray); margin-bottom: 2rem;">
             Kiểm tra thông tin giao hàng và sản phẩm trước khi đặt mua
         </p>
 
-        <div class="grid-2" style="gap: 2rem;">
+        <div class="checkout-grid checkout-form">
             <!-- Thông tin giao hàng -->
             <div>
-                <h2 style="margin-bottom: 1rem;">Thông tin giao hàng</h2>
+                <h2 style="margin-bottom: 1rem; color: var(--dark-color);">Thông tin giao hàng</h2>
                 <form id="checkoutForm">
                     <div class="form-group">
                         <label for="fullName">Họ và tên <span style="color: var(--danger-color);">*</span></label>
@@ -163,9 +74,9 @@
             </div>
 
             <!-- Tóm tắt đơn hàng -->
-            <div>
-                <h2 style="margin-bottom: 1rem;">Đơn hàng của bạn</h2>
-                <div id="orderItemsSummary" style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem;"></div>
+            <div class="checkout-summary">
+                <h2 style="margin-bottom: 1rem; color: var(--dark-color);">Đơn hàng của bạn</h2>
+                <div id="orderItemsSummary" style="max-height: 350px; overflow-y: auto; margin-bottom: 1.5rem; padding-right: 10px;"></div>
 
                 <!-- VOUCHER BOX -->
                 <div class="voucher-box">

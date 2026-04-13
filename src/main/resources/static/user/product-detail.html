@@ -5,180 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết sản phẩm - Secondhand Shop</title>
     <link rel="stylesheet" href="css/user-style.css">
-    <style>
-        .product-page {
-            background: #f5f5f5;
-            padding: 2rem 0;
-        }
-        .product-detail-card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            padding: 2rem;
-            display: grid;
-            grid-template-columns: 450px 1fr;
-            gap: 2rem;
-        }
-        @media (max-width: 768px) {
-            .product-detail-card {
-                grid-template-columns: 1fr;
-            }
-        }
-        .product-image-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .main-image {
-            width: 100%;
-            height: 450px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #eee;
-        }
-        .product-info-section h1 {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 1rem;
-            line-height: 1.4;
-        }
-        .product-meta {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        .product-rating {
-            color: #ee4d2d;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .product-rating .stars {
-            text-decoration: underline;
-        }
-        .product-sold {
-            color: #222;
-        }
-        .product-price-box {
-            background: #fafafa;
-            padding: 1rem 1.5rem;
-            border-radius: 4px;
-            margin-bottom: 2rem;
-        }
-        .product-price {
-            font-size: 2rem;
-            color: #ee4d2d;
-            font-weight: 500;
-        }
-        .product-attributes {
-            display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 1rem 0;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        .attr-value {
-            color: #222;
-        }
-        .quantity-selector {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .qty-controls {
-            display: flex;
-            border: 1px solid #e1e1e1;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .qty-btn {
-            background: #fff;
-            border: none;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 1rem;
-            color: #555;
-            transition: background 0.2s;
-        }
-        .qty-btn:hover {
-            background: #f8f8f8;
-        }
-        .qty-input {
-            width: 50px;
-            border: none;
-            border-left: 1px solid #e1e1e1;
-            border-right: 1px solid #e1e1e1;
-            text-align: center;
-            font-size: 1rem;
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        .qty-input::-webkit-outer-spin-button,
-        .qty-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .product-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        .btn-add-cart {
-            background: rgba(238, 77, 45, 0.1);
-            color: #ee4d2d;
-            border: 1px solid #ee4d2d;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-        .btn-add-cart:hover {
-            background: rgba(238, 77, 45, 0.15);
-        }
-        .btn-buy-now {
-            background: #ee4d2d;
-            color: #fff;
-            border: 1px solid #ee4d2d;
-            padding: 0.8rem 2.5rem;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-buy-now:hover {
-            background: #d73211;
-        }
-        .product-description-card {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-            padding: 2rem;
-            margin-top: 1.5rem;
-        }
-        .product-description-card h2 {
-            font-size: 1.2rem;
-            font-weight: 500;
-            background: #fafafa;
-            padding: 0.8rem 1rem;
-            margin: -2rem -2rem 1.5rem -2rem;
-            border-bottom: 1px solid #eee;
-            border-radius: 8px 8px 0 0;
-        }
-        .desc-content {
-            line-height: 1.6;
-            color: #444;
-            white-space: pre-line;
-        }
-    </style>
 </head>
 <body>
     <!-- HEADER -->
@@ -212,9 +38,9 @@
     </header>
 
     <!-- CONTENT -->
-    <main class="product-page">
+    <main class="page-container">
         <div class="container">
-            <nav class="breadcrumb-container" style="margin-bottom: 1rem; padding: 0;">
+            <nav class="breadcrumb-container" style="padding: 0;">
                 <a href="index.html" class="breadcrumb-item home-link">Trang chủ</a>
                 <span class="breadcrumb-separator">›</span>
                 <a href="products.html" class="breadcrumb-item home-link">Sản phẩm</a>
@@ -225,7 +51,7 @@
             <div id="productDetailContent">
                 <div class="loading" style="padding: 5rem 0;">
                     <div class="spinner"></div>
-                    <p>Đang tải thông tin sản phẩm...</p>
+                    <p style="color: var(--text-gray); font-weight: 500;">Đang tải thông tin sản phẩm...</p>
                 </div>
             </div>
         </div>
@@ -327,68 +153,59 @@
             const condition = conditions[Math.floor(Math.random() * conditions.length)];
             
             const html = `
-                <div class="product-detail-card">
+                <div class="modern-card product-detail-layout">
                     <div class="product-image-section">
-                        <img src="${product.imageUrl || '../images/placeholder.png'}" onerror="this.src='../images/placeholder.png'" class="main-image" alt="${product.name}">
+                        <div class="main-image-wrapper">
+                            <img src="${product.imageUrl || '../images/placeholder.png'}" onerror="this.src='../images/placeholder.png'" alt="${product.name}">
+                        </div>
                     </div>
                     
                     <div class="product-info-section">
                         <h1>${product.name}</h1>
                         
-                        <div class="product-meta">
-                            <div class="product-rating">
-                                <span class="stars">${rating}</span>
-                                <span>⭐</span>
-                            </div>
-                            <span style="color: #ddd;">|</span>
-                            <div>
-                                <span style="text-decoration: underline;">${reviews}</span> <span style="color: #767676;">Đánh Giá</span>
-                            </div>
-                            <span style="color: #ddd;">|</span>
-                            <div class="product-sold">
-                                <span>${sold}</span> <span style="color: #767676;">Đã Bán</span>
-                            </div>
-                        </div>
+
 
                         <div class="product-price-box">
-                            <div class="product-price">${formatCurrency(product.price)}</div>
+                            <div class="product-price-large">${formatCurrency(product.price)}</div>
                         </div>
 
                         <div class="product-attributes">
                             <div class="attr-label">Vận chuyển</div>
                             <div class="attr-value">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="color: #00bfa5;">🚚</span> Miễn phí vận chuyển
+                                    <span style="font-size:1.2rem;">🚚</span> Miễn phí vận chuyển
                                 </div>
                             </div>
                             
                             <div class="attr-label">Tình trạng</div>
-                            <div class="attr-value">${condition}</div>
+                            <div class="attr-value">
+                                <span class="product-condition" style="margin-bottom:0;">${condition}</span>
+                            </div>
                             
                             <div class="attr-label">Danh mục</div>
                             <div class="attr-value">${product.category?.name || 'Đồ cũ'}</div>
                         </div>
 
                         <div class="quantity-selector">
-                            <span style="color: #555; width: 104px;">Số lượng</span>
+                            <div class="attr-label" style="width: 120px;">Số lượng</div>
                             <div class="qty-controls">
                                 <button class="qty-btn" id="btnMinusQty">-</button>
                                 <input type="number" id="buyQty" class="qty-input" value="1" min="1" max="99">
                                 <button class="qty-btn" id="btnAddQty">+</button>
                             </div>
-                            <span style="color: #767676; font-size: 0.9rem; margin-left: 1rem;">${Math.floor(Math.random() * 50) + 1} sản phẩm có sẵn</span>
+                            <span style="color: var(--text-gray); font-size: 0.95rem;">${Math.floor(Math.random() * 50) + 1} sản phẩm có sẵn</span>
                         </div>
 
                         <div class="product-actions">
-                            <button class="btn-add-cart" id="btnAddToCart">
+                            <button class="btn btn-secondary" id="btnAddToCart" style="flex:1;">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="9" cy="21" r="1"></circle>
                                     <circle cx="20" cy="21" r="1"></circle>
                                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                                 </svg>
-                                Thêm Vào Giỏ Hàng
+                                Thêm Vào Giỏ
                             </button>
-                            <button class="btn-buy-now" id="btnBuyNow">Mua Ngay</button>
+                            <button class="btn-buy-now" id="btnBuyNow" style="flex:1;">Mua Ngay</button>
                         </div>
                     </div>
                 </div>
