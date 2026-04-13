@@ -336,8 +336,8 @@ function injectVoucherManagementPanel() {
                             <th>Mã</th>
                             <th>Mức giảm</th>
                             <th>Đơn tối thiểu</th>
-                            <th>So luong</th>
-                            <th>Con lai</th>
+                            <th>Số lượng</th>
+                            <th>Còn lại</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Áp dụng cho level</th>
