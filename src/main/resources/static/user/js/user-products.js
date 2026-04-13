@@ -50,6 +50,9 @@ async function loadCategoriesToFilter() {
         const filterSelect = document.getElementById('categoryFilter');
         if (!filterSelect) return;
 
+        // Reset dropdown to prevent duplicates
+        filterSelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+
         categories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat.id;
