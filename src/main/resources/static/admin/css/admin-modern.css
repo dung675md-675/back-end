@@ -242,6 +242,8 @@ body {
     align-items: center;
     gap: 1.25rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden; /* Prevent content from leaking out */
 }
 
 .stat-card:hover {
@@ -269,6 +271,8 @@ body {
 .stat-content {
     display: flex;
     flex-direction: column;
+    min-width: 0; /* Critical for ellipsis on flex children */
+    flex: 1;
 }
 
 .stat-card h3 {
@@ -283,6 +287,10 @@ body {
     font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 /* ===================================

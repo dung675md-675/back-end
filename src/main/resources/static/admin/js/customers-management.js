@@ -486,6 +486,12 @@ function collectCouponFormData() {
         showNotification('Ngày kết thúc phải lớn hơn ngày bắt đầu.', 'warning');
         return null;
     }
+    const now = new Date();
+    // Thêm buffer 5 phút để tránh lỗi do lệch giây hoặc lệch múi giờ nhỏ giữa client/server
+    if (new Date(startDate) < new Date(now.getTime() - 5 * 60 * 1000)) {
+        showNotification('Thời gian bắt đầu không thể ở quá khứ.', 'warning');
+        return null;
+    }
     if (targetLevels.length === 0) {
         showNotification('Vui lòng chọn ít nhất một level để áp dụng.', 'warning');
         return null;

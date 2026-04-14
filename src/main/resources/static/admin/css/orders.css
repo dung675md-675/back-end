@@ -209,21 +209,21 @@
     background: white;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-card);
     text-align: center;
-    border-left: 4px solid var(--primary-color);
+    border-left: 4px solid var(--vp-c-brand);
 }
 
 .order-stat-card.pending {
-    border-left-color: var(--warning-color);
+    border-left-color: var(--warning);
 }
 
 .order-stat-card.shipping {
-    border-left-color: var(--secondary-color);
+    border-left-color: var(--info);
 }
 
 .order-stat-card.delivered {
-    border-left-color: var(--success-color);
+    border-left-color: var(--success);
 }
 
 .stat-number {

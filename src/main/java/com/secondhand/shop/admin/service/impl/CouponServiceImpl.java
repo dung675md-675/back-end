@@ -61,7 +61,18 @@ public class CouponServiceImpl implements CouponService {
     public CouponDTO createCoupon(CouponDTO dto) {
         String normalizedCode = normalizeCode(dto.getCode());
         if (couponRepository.existsByCode(normalizedCode)) {
-            throw new RuntimeException("Ma voucher da ton tai: " + normalizedCode);
+            throw new RuntimeException("Mã voucher đã tồn tại: " + normalizedCode);
+        }
+
+        LocalDateTime start = parseDateTime(dto.getStartDate());
+        LocalDateTime end = parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate()));
+        LocalDateTime now = LocalDateTime.now();
+
+        if (start != null && start.isBefore(now.minusMinutes(1))) { // 1-minute buffer for latency
+            throw new RuntimeException("Thời gian bắt đầu không thể ở quá khứ");
+        }
+        if (end != null && start != null && end.isBefore(start)) {
+            throw new RuntimeException("Thời gian kết thúc phải sau thời gian bắt đầu");
         }
 
         Coupon coupon = Coupon.builder()
@@ -74,8 +85,8 @@ public class CouponServiceImpl implements CouponService {
                 .minOrderValue(dto.resolveMinOrderValue())
                 .minRank(resolveMinRank(dto))
                 .status(Coupon.CouponStatus.ACTIVE)
-                .startDate(parseDateTime(dto.getStartDate()))
-                .expiryDate(parseDateTime(firstNonBlank(dto.getEndDate(), dto.getExpiryDate())))
+                .startDate(start)
+                .expiryDate(end)
                 .totalQuantity(resolveTotalQuantityForCreate(dto))
                 .build();
 

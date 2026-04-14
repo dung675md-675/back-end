@@ -51,10 +51,13 @@
     <!-- CONTENT -->
     <main class="page-container">
         <div class="container">
-            <nav class="breadcrumb-container" style="padding: 0;">
-                <a href="index.html" class="breadcrumb-item home-link">Trang chủ</a>
+            <nav class="breadcrumb-container">
+                <a href="index.html" class="breadcrumb-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Trang chủ
+                </a>
                 <span class="breadcrumb-separator">›</span>
-                <a href="products.html" class="breadcrumb-item home-link">Sản phẩm</a>
+                <a href="products.html" class="breadcrumb-item">Sản phẩm</a>
                 <span class="breadcrumb-separator">›</span>
                 <span class="breadcrumb-item active" id="breadcrumbProductName">Chi tiết</span>
             </nav>
@@ -184,7 +187,8 @@
                             <div class="attr-label">Vận chuyển</div>
                             <div class="attr-value">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size:1.2rem;">🚚</span> Miễn phí vận chuyển
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--success-color);"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                                    Miễn phí vận chuyển
                                 </div>
                             </div>
                             
@@ -220,6 +224,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <div class="product-description-card">
                     <h2>CHI TIẾT SẢN PHẨM</h2>
@@ -324,11 +329,27 @@
                 return;
             }
 
-            const added = handleAddToCart();
-            if (!added) return;
+            // Đặt số lượng mua tạm thời vào cart hoặc cập nhật nếu đã có
+            const cartItems = getCart();
+            const existingItem = cartItems.find(item => item.productId === currentProduct.id);
+            if (existingItem) {
+                existingItem.quantity = qty; // Cập nhật số lượng bằng số lượng đang chọn
+            } else {
+                cartItems.push({
+                    productId: currentProduct.id,
+                    productName: currentProduct.name,
+                    price: currentProduct.price,
+                    quantity: qty,
+                    imageUrl: currentProduct.imageUrl || ''
+                });
+            }
+            saveCart(cartItems);
 
+            // Chỉ thanh toán sản phẩm này
             const checkoutIds = [currentProduct.id];
             localStorage.setItem('checkoutItems', JSON.stringify(checkoutIds));
+            
+            // Chuyển hướng
             window.location.href = 'checkout.html';
         }
     </script>
