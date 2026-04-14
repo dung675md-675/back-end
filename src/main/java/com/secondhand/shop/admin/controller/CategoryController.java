@@ -10,12 +10,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+//Cho phép class nhận HTTP request từ client.
+//Tự động convert object Java thành JSON trả về.
 @RequestMapping("/api/categories")
+//Đặt base URL cho toàn bộ API trong controller này.
 @RequiredArgsConstructor
+//Tự động tạo constructor cho tất cả field:
 @CrossOrigin(origins = "*")
+//Cho phép frontend từ domain khác gọi API này.
 public class CategoryController {
+    
+    //public CategoryController(CategoryService categoryService) {
+    //this.categoryService = categoryService;}
 
     private final CategoryService categoryService;
+    //Để dùng Dependency Injection gọn hơn, khỏi phải tự viết constructor.
 
     // GET: Lấy tất cả categories
     @GetMapping

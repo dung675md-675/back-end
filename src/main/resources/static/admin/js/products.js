@@ -314,7 +314,7 @@ function getStatusBadgeClass(status) {
 function getStatusText(status) {
     const texts = {
         'AVAILABLE': 'Còn hàng',
-        'SOLD': 'Đã bán',
+        'SOLD': 'Đã bán hết',
         'RESERVED': 'Đã đặt',
         'DELETED': 'Đã xóa'
     };

@@ -296,9 +296,9 @@ function addToCart(productIdOrItem, productName, price, imageUrl, quantity = 1) 
     saveCart(cart);
 
     if (existed) {
-        showNotification('Da cap nhat so luong trong gio hang!', 'success');
+        showNotification('Đã cập nhật số lượng trong giỏ!', 'success');
     } else {
-        showNotification('Da them vao gio hang!', 'success');
+        showNotification('Đã thêm vào giỏ hàng!', 'success');
     }
 
     return true;
